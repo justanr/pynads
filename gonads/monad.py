@@ -8,7 +8,7 @@ class MonadMeta(ABCMeta):
     def __lt__(self, value):
         return self.unit(value)
 
-def Monad(metaclass=MonadMeta):
+class Monad(metaclass=MonadMeta):
     
     @abstractmethod
     def bind(self, f):
