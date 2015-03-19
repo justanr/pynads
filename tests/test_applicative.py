@@ -1,6 +1,6 @@
 import pytest
-from gonads.functor import fmap
-from gonads.applicative import Applicative, multiapply, unit
+from pynads.functor import fmap
+from pynads.applicative import Applicative, multiapply, unit
 
 class MyApplicative(Applicative):
     def __init__(self, v):

@@ -1,5 +1,5 @@
 import pytest
-from gonads.functor import Functor, fmap
+from pynads.functor import Functor, fmap
 
 class MyFunctor(Functor):
     def __init__(self, v):

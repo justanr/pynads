@@ -1,6 +1,6 @@
 import pytest
 
-from gonads.monad import Monad, multibind
+from pynads.monad import Monad, multibind
 
 class MyMonad(Monad):
     

@@ -27,13 +27,13 @@ tests_require = ['py', 'pytest']
 if __name__ == "__main__":
 
     setup(
-        name="gonads",
+        name="pynads",
         version="0.0.1",
         author="Alec Nikolas Reiter",
         description="Bad monads for Python",
         license="MIT",
-        packages=["gonads"],
-        url="https://github.com/justanr/gonads",
+        packages=["pynads"],
+        url="https://github.com/justanr/pynads",
         keywords="monad functor applicative",
         test_suite='tests',
         tests_require=tests_require,

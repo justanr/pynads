@@ -1,5 +1,5 @@
 import pytest
-from gonads.either import Either, Left, Right
+from pynads.either import Either, Left, Right
 
 add_two = lambda x: x+2
 m_add_two = lambda x: Right(add_two(x))

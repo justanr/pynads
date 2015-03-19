@@ -1,4 +1,4 @@
-#gonads
+#pynads
 
 Just playing around with implementing monads in Python.
 
@@ -21,6 +21,6 @@ Just(4) >> (lambda v: Maybe(v+2))
 
 Chain them together with excessive parens:
 
-```
+```python
 Maybe.unit(4) >> (lambda v: Maybe(v+2)) >> (lambda v: Nothing)
 ```
