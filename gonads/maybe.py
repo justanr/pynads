@@ -1,35 +1,66 @@
+from collections import namedtuple
 from .monad import Monad
 
+_Just = namedtuple('_Just', ['v'])
+
 class Maybe(Monad):
-    def __new__(self, value):
-        return Just(value) if value is not None else Nothing()
+    """Represents a potential computation.
+    
+    The actual constructor for Maybe doesn't return an instance of Maybe
+    but instead an instance of Just or the singleton Nothing.
+
+    The unit method returns an instance of Just, which is the minimal
+    context needed for a potential computation.
+    """
+    def __new__(self, v, checker=lambda v: v is not None):
+        return Just(v) if checker(v) else Nothing
 
     def __bool__(self):
         return isinstance(self, Just)
 
-class Just(Monad):
-    
-    def __new__(self, value):
-        return object.__new__(self)
+    @staticmethod
+    def unit(v):
+        return Just(v)
 
-    def __init__(self, val, *args, **kwargs):
-        self.val = val
+class Just(Maybe, _Just):
+    """Represents a value from a calculation.
+    """
+
+    def __new__(self, v):
+        return _Just.__new__(self, v)
 
     def __repr__(self):
-        return "Just {!r}".format(self.val)
+        return "Just {!r}".format(self.v)
+
+    def __eq__(self, other):
+        return isinstance(other, Just) and self.v == other.v
+
+    def fmap(self, f):
+        return Just(f(self.v))
+
+    def apply(self, applicative):
+        return fmap(self.v, applicative)
 
     def bind(self, f):
-        res = f(self.val)
-        if not isinstance(res, Monad):
-            raise TypeError("bind must return a monadic instance")
-        return res
+        return f(self.v)
 
-class Nothing(Maybe):
+class _Nothing(Maybe):
+    """Singleton class representing a monadic failure in a computation.
+    
+    fmap, apply and bind all return the singleton instance of Nothing
+    and short circuits all further bind operations.
+    """
+    __inst = None
+
     def __new__(self, value=None):
-        return object.__new__(self)
+        if self.__inst is None:
+            self.__inst = object.__new__(self)
+        return self.__inst
 
     def __repr__(self):
         return "Nothing"
 
-    def bind(self, f):
-        return self
+    fmap = apply = bind = lambda self, _: self
+
+# Singleton Nothing
+Nothing = _Nothing()
