@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
-class Functor(ABC):
+class Functor(metaclass=ABCMeta):
     """Functors are data types that know how to be mapped over.
 
     To implement the functor protocol, all the subclass needs to do is implement
