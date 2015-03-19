@@ -1,6 +1,6 @@
 #gonads
 
-Just playing around with implementing monads in Python by abusing metaclasses.
+Just playing around with implementing monads in Python.
 
 Quick Examples
 --------------
