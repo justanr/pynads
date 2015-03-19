@@ -10,17 +10,17 @@ It comes with Maybe implemented.
 Put a value in a monadic context:
 
 ```python
-4 > Maybe # returns Just(4)
+Maybe.unit(4) # Returns Just(4)
 ```
 
 Use a bastardized version of Haskell's `>>=`:
 
 ```python
-Just(4) >= (lambda v: v+2 > Maybe)
+Just(4) >> (lambda v: Maybe(v+2))
 ```
 
 Chain them together with excessive parens:
 
 ```
-(4 > Maybe) >= (lambda v: v+2 > Maybe)
+Maybe.unit(4) >> (lambda v: Maybe(v+2)) >> (lambda v: Nothing)
 ```
