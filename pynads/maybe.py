@@ -1,4 +1,5 @@
 from collections import namedtuple
+from .functor import fmap
 from .monad import Monad
 
 _Just = namedtuple('_Just', ['v'])
