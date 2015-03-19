@@ -29,6 +29,14 @@ def test_class_unit():
     assert a.v is id and isinstance(a, Applicative)
 
 
+def test_unit_shortcut():
+    assert (2 & MyApplicative) == MyApplicative.unit(2)
+
+
+def test_myapplicative_instance_doesnt_have_rand():
+    assert not hasattr(MyApplicative(None), '__rand__')
+
+
 def test_apply():
     a = MyApplicative.unit(id)
     b = MyApplicative.unit('b')
