@@ -3,9 +3,6 @@ from pynads import fmap, multiapply, unit, Applicative
 
 
 class MyApplicative(Applicative):
-    def __init__(self, v):
-        self.v = v
-
     @classmethod
     def unit(cls, v):
         return cls(v)

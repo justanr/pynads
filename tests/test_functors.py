@@ -2,9 +2,6 @@ import pytest
 from pynads import Functor, fmap
 
 class MyFunctor(Functor):
-    def __init__(self, v):
-        self.v = v
-
     def fmap(self, f):
         return MyFunctor(f(self.v))
 

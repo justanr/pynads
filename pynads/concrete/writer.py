@@ -6,10 +6,10 @@ class Writer(Monad):
     """Stores a value as well as a log of events that have transpired
     with the value.
     """
-    __slots__ = ('v', 'log')
+    __slots__ = ('log',)
 
     def __init__(self, v, log):
-        self.v = v
+        super(Writer, self).__init__(v)
 
         if _iter_but_not_str_or_map(log):
             print("convert iter to list log...")

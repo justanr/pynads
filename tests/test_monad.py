@@ -1,10 +1,6 @@
 from pynads import Monad, multibind
 
 class MyMonad(Monad):
-    
-    def __init__(self, v):
-        self.v = v
-
     @classmethod
     def unit(cls, v):
         return cls(v)

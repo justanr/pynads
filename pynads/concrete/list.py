@@ -61,7 +61,7 @@ class List(Monad, Sequence):
     will just cause it to compute forever, probably blowing memory out of the
     water as well.
     """
-    __slots__ = ('v',)
+    __slots__ = ()
 
     def __init__(self, *vs):
         # rather than tyring to do all sorts of
@@ -69,7 +69,7 @@ class List(Monad, Sequence):
         # but also a monad, we'll just proxy all the
         # needed operations to a tuple
         # also alleviates the need for ``__new__``
-        self.v = tuple(vs)
+        super(List, self).__init__(vs)
 
     def __repr__(self):
         main = "List({!s})"

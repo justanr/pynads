@@ -1,5 +1,6 @@
 from ..funcs import fmap
 from ..abc import Monad
+from ..utils import _propagate_self, _failed
 
 class Either(Monad):
     """Enhanced version of Maybe. Represents a successful computation or
@@ -17,12 +18,12 @@ class Either(Monad):
 class Left(Either):
     """Similar to Nothing in that it only returns itself when fmap, apply
     or bind is called. However, Left also carries an error message instead
-    of representing a completely failed computation.
-    """
-    __slots__ = ('v',)
+    of representing an unknown failed computation.
 
-    def __init__(self, v):
-        self.v = v
+    Again, similar to Nothing, Left's proxy and starproxy methods simply
+    return False.
+    """
+    __slots__ = ()
 
     def __repr__(self):
         return "Left {}".format(self.v)
@@ -30,16 +31,14 @@ class Left(Either):
     def __eq__(self, other):
         return isinstance(other, Left) and self.v == other.v
 
-    fmap = apply = bind = lambda self, _: self
+    fmap = apply = bind = _propagate_self
+    proxy = starproxy = _failed
 
 class Right(Either):
     """Represents a result of a computation. Similar to Just except it is
     semantically a finished computation.
     """
-    __slots__ = ('v',)
-
-    def __init__(self, v):
-        self.v = v
+    __slots__ = ()
 
     def __eq__(self, other):
         return isinstance(other, Right) and other.v == self.v

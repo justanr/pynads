@@ -43,3 +43,8 @@ def test_nothing_transforms():
 
 def test_Nothing_propagates():
     assert (Just(2) >> n_add_two >> add_two) is Nothing
+
+
+def test_Nothing_proxy_is_false():
+    assert not Nothing.proxy(lambda x: x%1)
+    assert not Nothing.starproxy(lambda x, y: x%y)

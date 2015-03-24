@@ -1,6 +1,10 @@
 from collections import namedtuple
 from ..funcs import fmap
 from ..abc import Monad
+from ..utils import _propagate_self, _failed
+
+
+__all__ = ('Maybe', 'Just', 'Nothing')
 
 
 class Maybe(Monad):
@@ -27,19 +31,17 @@ class Maybe(Monad):
 
 class Just(Maybe):
     """Represents a value from a calculation.
+
+    Just will act as a proxy for all methods found on its value *except*
+    for __repr__, __name__, fmap, apply and bind.
     """
-    __slots__ = ('v',)
+    __slots__ = ()
+
     def __new__(cls, v):
         return object.__new__(cls)
 
-    def __init__(self, v):
-        self.v = v
-
     def __repr__(self):
         return "Just {!r}".format(self.v)
-
-    def __eq__(self, other):
-        return isinstance(other, Just) and self.v == other.v
 
     def fmap(self, f):
         return Just(f(self.v))
@@ -50,11 +52,19 @@ class Just(Maybe):
     def bind(self, f):
         return f(self.v)
 
+    def __eq__(self, other):
+        if isinstance(other, Just):
+            return self.v == other.v
+        return NotImplemented
+
 class _Nothing(Maybe):
     """Singleton class representing a monadic failure in a computation.
     
     fmap, apply and bind all return the singleton instance of Nothing
     and short circuits all further bind operations.
+
+    proxy and starproxy (see: ``pynads.abc.container.Container``) simply
+    return False.
     """
     __slots__ = ()
     __inst = None
@@ -67,7 +77,8 @@ class _Nothing(Maybe):
     def __repr__(self):
         return "Nothing"
 
-    fmap = apply = bind = lambda self, _: self
+    fmap = apply = bind = _propagate_self
+    proxy = starproxy = _failed
 
 # Singleton Nothing
 Nothing = _Nothing()

@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from .functor import Functor
+from ..utils import with_metaclass
 
 
 class ApplicativeMeta(ABCMeta):
@@ -18,7 +19,7 @@ class ApplicativeMeta(ABCMeta):
     def __rand__(self, other):
         return self.unit(other)
 
-class Applicative(Functor, metaclass=ApplicativeMeta):
+class Applicative(with_metaclass(ApplicativeMeta, Functor)):
     """Applicative Functors are data types that can store potential 
     computations. Since Applicative Functors are also functors, they are also
     mappable and must implement the `fmap` method.
