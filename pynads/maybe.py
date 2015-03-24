@@ -2,7 +2,6 @@ from collections import namedtuple
 from .functor import fmap
 from .monad import Monad
 
-_Just = namedtuple('_Just', ['v'])
 
 class Maybe(Monad):
     """Represents a potential computation.
@@ -23,12 +22,16 @@ class Maybe(Monad):
     def unit(v):
         return Just(v)
 
-class Just(Maybe, _Just):
+
+class Just(Maybe):
     """Represents a value from a calculation.
     """
 
-    def __new__(self, v):
-        return _Just.__new__(self, v)
+    def __new__(cls, v):
+        return object.__new__(cls)
+
+    def __init__(self, v):
+        self.v = v
 
     def __repr__(self):
         return "Just {!r}".format(self.v)

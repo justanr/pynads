@@ -1,9 +1,9 @@
-import pytest
 from pynads.maybe import Maybe, Just, _Nothing, Nothing
 
 add_two = lambda x: x+2
 m_add_two = lambda x: Just(x+2)
 n_add_two = lambda x: Nothing
+
 
 def test_maybe_new():
     assert isinstance(Maybe(4), Just)
@@ -22,11 +22,6 @@ def test_nothing_singleton():
     assert _Nothing() is Nothing
 
 
-def test_Just_immutable():
-    with pytest.raises(AttributeError):
-        Just(2).v = 4
-
-
 def assert_just_fmap():
     assert Just(2).fmap(add_two) == Just(4)
 
@@ -43,6 +38,7 @@ def test_nothing_transforms():
     assert Nothing.fmap(add_two) is Nothing
     assert Nothing.apply(add_two) is Nothing
     assert (Nothing >> m_add_two) is Nothing
+
 
 def test_Nothing_propagates():
     assert (Just(2) >> n_add_two >> add_two) is Nothing
