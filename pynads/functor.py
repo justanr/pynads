@@ -12,6 +12,7 @@ class Functor(metaclass=ABCMeta):
         >>>     def fmap(self, f):
         >>>         return FMapDict((k, f(v)) for k,v in self.items()))
     """
+    __slots__ = ()
     @abstractmethod
     def fmap(self, f):
         return False

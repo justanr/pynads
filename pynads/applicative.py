@@ -49,6 +49,7 @@ class Applicative(Functor, metaclass=ApplicativeMeta):
     >>> S_mul_two * Something(4) * Something(5)
     ... Something 20
     """
+    __slots__ = ()
 
     def __mul__(self, f):
         """Shortcut to Applicative.apply for quickly stringing

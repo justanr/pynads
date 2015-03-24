@@ -15,6 +15,8 @@ class Monad(Applicative):
 
     * ``>>`` is essentially Haskell's `>>=`
     """
+    __slots__ = ()
+
     @abstractmethod
     def bind(self, f):
         """Pushes a value into a monadic transformer function.
@@ -63,6 +65,11 @@ class Monad(Applicative):
 
         """
         return self.bind(f)
+
+
+def lift(f, v, monad):
+    return unit(f(v), monad)
+
 
 def multibind(monad, *binds):
     """Shortcut function for composing many monadic binds together.

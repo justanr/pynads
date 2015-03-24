@@ -5,6 +5,8 @@ class Either(Monad):
     """Enhanced version of Maybe. Represents a successful computation or
     a failed computation with an error msg.
     """
+    __slots__ = ()
+
     def __bool__(self):
         return isinstance(self, Right)
 
@@ -17,6 +19,8 @@ class Left(Either):
     or bind is called. However, Left also carries an error message instead
     of representing a completely failed computation.
     """
+    __slots__ = ('v',)
+
     def __init__(self, v):
         self.v = v
 
@@ -32,6 +36,7 @@ class Right(Either):
     """Represents a result of a computation. Similar to Just except it is
     semantically a finished computation.
     """
+    __slots__ = ('v',)
 
     def __init__(self, v):
         self.v = v

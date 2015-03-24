@@ -12,6 +12,8 @@ class Maybe(Monad):
     The unit method returns an instance of Just, which is the minimal
     context needed for a potential computation.
     """
+    __slots__ = ()
+
     def __new__(self, v, checker=lambda v: v is not None):
         return Just(v) if checker(v) else Nothing
 
@@ -26,7 +28,7 @@ class Maybe(Monad):
 class Just(Maybe):
     """Represents a value from a calculation.
     """
-
+    __slots__ = ('v',)
     def __new__(cls, v):
         return object.__new__(cls)
 
@@ -54,6 +56,7 @@ class _Nothing(Maybe):
     fmap, apply and bind all return the singleton instance of Nothing
     and short circuits all further bind operations.
     """
+    __slots__ = ()
     __inst = None
 
     def __new__(self, value=None):
