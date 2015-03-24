@@ -1,7 +1,11 @@
 # ABCs
-from .functor import Functor, fmap
-from .applicative import Applicative, unit, multiapply
-from .monad import Monad, multibind
+from .functor import Functor
+from .applicative import Applicative
+from .monad import Monad
+
+# functional variant of methods
+# just load them all into pynads namespace
+from .funcs import * 
 
 # Concrete monads
 from .either import Left, Right

@@ -16,8 +16,3 @@ class Functor(metaclass=ABCMeta):
     @abstractmethod
     def fmap(self, f):
         return False
-
-
-def fmap(f, functor):
-    """Callable form of fmap."""
-    return functor.fmap(f)

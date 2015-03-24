@@ -1,4 +1,4 @@
-from pynads.applicative import multiapply
+from pynads.funcs import multiapply
 from pynads.list import List
 
 

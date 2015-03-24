@@ -1,6 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from functools import reduce
-from operator import mul
 from .functor import Functor
 
 
@@ -65,16 +63,3 @@ class Applicative(Functor, metaclass=ApplicativeMeta):
     @abstractmethod
     def unit(v):
         return NotImplemented
-
-def unit(v, applicative):
-    """Puts a value in the minimum necessary context to form an Applicative.
-    """
-    return applicative.unit(v)
-
-def multiapply(initial, *args):
-    """Shorthand for stringing many applicatives together.
-
-    This is designed for use with a curried function that will gradually
-    build until it reaches the correct number of arguments to call itself.
-    """
-    return reduce(mul, args, initial)

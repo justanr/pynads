@@ -1,5 +1,5 @@
 from collections import namedtuple
-from .functor import fmap
+from .funcs import fmap
 from .monad import Monad
 
 

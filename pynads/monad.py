@@ -65,20 +65,3 @@ class Monad(Applicative):
 
         """
         return self.bind(f)
-
-
-def lift(f, v, monad):
-    return unit(f(v), monad)
-
-
-def multibind(monad, *binds):
-    """Shortcut function for composing many monadic binds together.
-
-    >>> add_two = lambda x: Just(x+2)
-    >>> multibind(Just(2), *repeat(add_two, 3))
-    ... Just 8
-
-    """
-    for bind in binds:
-        monad <<= bind
-    return monad
