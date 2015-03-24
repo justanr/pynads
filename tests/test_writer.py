@@ -10,7 +10,7 @@ def test_writer_unit():
 
 
 def test_fmap_id():
-    w = Writer.unit(2)
+    w = Writer.unit(2).fmap(f_id)
     assert w.v == 2 and w.log == []
 
 
