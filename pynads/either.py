@@ -1,17 +1,10 @@
-from collections import namedtuple
 from .functor import fmap
 from .monad import Monad
-
-_Left = namedtuple('_Left', ['msg'])
-_Right = namedtuple('_Right', ['v'])
 
 class Either(Monad):
     """Enhanced version of Maybe. Represents a successful computation or
     a failed computation with an error msg.
     """
-    def __new__(self, *args):
-        raise TypeError("Instantiate Left or Right directly.")
-
     def __bool__(self):
         return isinstance(self, Right)
 
@@ -19,28 +12,36 @@ class Either(Monad):
     def unit(v):
         return Right(v)
 
-class Left(Either, _Left):
+class Left(Either):
     """Similar to Nothing in that it only returns itself when fmap, apply
     or bind is called. However, Left also carries an error message instead
     of representing a completely failed computation.
     """
-
-    def __new__(self, msg):
-        return _Left.__new__(self, msg)
+    def __init__(self, v):
+        self.v = v
 
     def __repr__(self):
-        return "Left {}".format(self.msg)
+        return "Left {}".format(self.v)
+
+    def __eq__(self, other):
+        return isinstance(other, Left) and self.v == other.v
 
     fmap = apply = bind = lambda self, _: self
 
-class Right(Either, _Right):
+class Right(Either):
     """Represents a result of a computation. Similar to Just except it is
     semantically a finished computation.
     """
 
-    def __new__(self, v):
-        return _Right.__new__(self, v)
+    def __init__(self, v):
+        self.v = v
 
+    def __eq__(self, other):
+        return isinstance(other, Right) and other.v == self.v
+    
+    def __repr__(self):
+        return "Right {!r}".format(self.v)
+    
     def fmap(self, f):
         return Right(f(self.v))
 
@@ -49,3 +50,5 @@ class Right(Either, _Right):
 
     def bind(self, f):
         return f(self.v)
+
+

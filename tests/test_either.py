@@ -9,25 +9,11 @@ def test_cant_make_either():
     with pytest.raises(TypeError) as excinfo:
         e = Either()
 
-    assert "Instantiate Left or Right directly." == str(excinfo.value)
-    assert 'e' not in locals()
-
 
 def test_truthiness():
     assert bool(Right(2))
     assert not bool(Left('failed'))
     assert Right(2) == Right(2)
-    assert Left('failed') == Left('failed')
-
-
-def test_Left_immutability():
-    with pytest.raises(AttributeError):
-        Left(2).msg = 'failure'
-
-
-def test_Right_immutability():
-    with pytest.raises(AttributeError):
-        Right(2).v = 4
 
 
 def test_left_transforms():
