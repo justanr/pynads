@@ -95,7 +95,7 @@ But wait, there's an operator!
 Just(lambda x: x+2) * Just(2)
 ```
 
-Just like before, take operator overloading abuse to 11!
+*Just* like before, take operator overloading abuse to 11!
 
 ```python
 ((lambda x: x+2) & Just) * Just(2)
