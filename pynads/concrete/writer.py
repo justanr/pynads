@@ -1,6 +1,6 @@
-from .utils import _iter_but_not_str_or_map
-from .monad import Monad
-from .funcs import fmap
+from ..utils import _iter_but_not_str_or_map
+from ..abc import Monad
+from ..funcs import fmap
 
 class Writer(Monad):
     """Stores a value as well as a log of events that have transpired

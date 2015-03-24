@@ -1,5 +1,4 @@
-from pynads.funcs import multiapply
-from pynads.list import List
+from pynads import List, multiapply
 
 
 add_two = lambda x: x+2

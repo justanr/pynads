@@ -1,8 +1,8 @@
 from collections.abc import Sequence, Mapping, Iterable
 from itertools import chain
-from .monad import Monad
-from .funcs import fmap
-from .utils import _iter_but_not_str_or_map
+from ..abc import Monad
+from ..funcs import fmap
+from ..utils import _iter_but_not_str_or_map
 
 
 __all__ = ('List',)

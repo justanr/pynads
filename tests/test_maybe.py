@@ -1,4 +1,5 @@
-from pynads.maybe import Maybe, Just, _Nothing, Nothing
+from pynads import Maybe, Just, Nothing
+from pynads.concrete.maybe import _Nothing
 
 add_two = lambda x: x+2
 m_add_two = lambda x: Just(x+2)

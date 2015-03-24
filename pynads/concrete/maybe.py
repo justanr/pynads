@@ -1,6 +1,6 @@
 from collections import namedtuple
-from .funcs import fmap
-from .monad import Monad
+from ..funcs import fmap
+from ..abc import Monad
 
 
 class Maybe(Monad):

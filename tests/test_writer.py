@@ -1,4 +1,4 @@
-from pynads.writer import Writer
+from pynads import Writer
 
 add_two = lambda x: x+2
 m_add_two = lambda x: (x+2, 'added two')

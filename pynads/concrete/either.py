@@ -1,5 +1,5 @@
-from .funcs import fmap
-from .monad import Monad
+from ..funcs import fmap
+from ..abc import Monad
 
 class Either(Monad):
     """Enhanced version of Maybe. Represents a successful computation or
