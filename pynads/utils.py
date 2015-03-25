@@ -2,7 +2,7 @@ from collections.abc import Iterable, Mapping
 
 
 __all__ = ('_iter_but_not_str_or_map', '_propagate_self',
-           '_failed', 'with_metaclass')
+           'with_metaclass')
 
 
 def _iter_but_not_str_or_map(x):
@@ -15,14 +15,6 @@ def _propagate_self(self, *_):
     computations, they simply propagate themselves instead.
     """
     return self
-
-
-def _failed(self, *_):
-    """Similar to _propagate_self, however, this returns False and is used
-    to replace ``pynads.abc.Container.proxy`` and 
-    ``pynads.abc.Container.starproxy```.
-    """
-    return False
 
 
 def with_metaclass(meta, *bases):
