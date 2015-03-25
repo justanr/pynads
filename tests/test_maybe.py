@@ -12,6 +12,12 @@ def test_maybe_new():
     assert Maybe(4, checker=lambda x: x&1) is Nothing
 
 
+def test_maybe_custom_check():
+    c = lambda x: x&1
+    assert Maybe(1, checker=c) == Just(1)
+    assert Maybe(2, checker=c) is Nothing
+
+
 def test_truthiness():
     assert not bool(Nothing)
     assert bool(Just(1))
