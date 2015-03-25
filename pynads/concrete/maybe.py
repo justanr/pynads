@@ -1,7 +1,7 @@
 from collections import namedtuple
 from ..funcs import fmap
 from ..abc import Monad
-from ..utils import _propagate_self, _failed
+from ..utils import _propagate_self
 
 
 __all__ = ('Maybe', 'Just', 'Nothing')
@@ -62,9 +62,6 @@ class _Nothing(Maybe):
     
     fmap, apply and bind all return the singleton instance of Nothing
     and short circuits all further bind operations.
-
-    proxy and starproxy (see: ``pynads.abc.container.Container``) simply
-    return False.
     """
     __slots__ = ()
     __inst = None
@@ -78,7 +75,6 @@ class _Nothing(Maybe):
         return "Nothing"
 
     fmap = apply = bind = _propagate_self
-    proxy = starproxy = _failed
 
 # Singleton Nothing
 Nothing = _Nothing()

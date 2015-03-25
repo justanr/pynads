@@ -23,12 +23,6 @@ def test_left_transforms():
     assert (a >> add_two) is a
 
 
-def test_left_proxy_returns_false():
-    a = Left('failed')
-    assert not a.proxy(lambda x: x == 1)
-    assert not a.starproxy(lambda x, y: x+y, 1)
-
-
 def test_right_fmap():
     assert Right(2).fmap(add_two) == Right(4)
 

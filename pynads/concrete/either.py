@@ -1,6 +1,6 @@
 from ..funcs import fmap
 from ..abc import Monad
-from ..utils import _propagate_self, _failed
+from ..utils import _propagate_self
 
 class Either(Monad):
     """Enhanced version of Maybe. Represents a successful computation or
@@ -32,7 +32,6 @@ class Left(Either):
         return isinstance(other, Left) and self.v == other.v
 
     fmap = apply = bind = _propagate_self
-    proxy = starproxy = _failed
 
 class Right(Either):
     """Represents a result of a computation. Similar to Just except it is

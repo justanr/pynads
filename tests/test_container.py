@@ -18,16 +18,3 @@ def test_Container_weakref():
         pytest.fail("Can't create weakref.")
     else:
         assert c.__weakref__ is w, "__weakref__ miscreated"
-
-
-def test_Container_proxy():
-    c = Container(1)
-    assert c.proxy(lambda x: x==1)
-    assert c.proxy(lambda x: not x%1)
-
-
-def test_Container_starproxy():
-    c = Container(2)
-    assert c.starproxy(mod, 3) == 2
-    assert c.starproxy(mod, 3, append=True) == 1
-    assert c.starproxy(eq, 2) == True
