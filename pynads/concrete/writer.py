@@ -12,10 +12,8 @@ class Writer(Monad):
         super(Writer, self).__init__(v)
 
         if _iter_but_not_str_or_map(log):
-            print("convert iter to list log...")
             self.log = [l for l in log]
         else:
-            print("convert str/map/other to list log...")
             self.log = [log]
 
     @classmethod
