@@ -1,6 +1,7 @@
 from ..utils import _iter_but_not_str_or_map
 from ..abc import Monad
 from ..funcs import fmap
+from .list import List
 
 class Writer(Monad):
     """Stores a value as well as a log of events that have transpired
@@ -12,9 +13,9 @@ class Writer(Monad):
         super(Writer, self).__init__(v)
 
         if _iter_but_not_str_or_map(log):
-            self.log = [l for l in log]
+            self.log = List.unit([l for l in log])
         else:
-            self.log = [log]
+            self.log = List.unit(log)
 
     @classmethod
     def unit(cls, v):
@@ -28,7 +29,7 @@ class Writer(Monad):
 
     def bind(self, f):
         v, msg = f(self.v)
-        return Writer(v, self.log + [msg])
+        return Writer(v, self.log + (msg,))
 
     def __repr__(self):
         return "Writer({!r}, {!r})".format(self.v, self.log)
