@@ -26,13 +26,6 @@ def madd(x):
     return R(add_two(x))
 
 
-def mgetter(key):
-    return R(itemgetter(key))
-
-
-env = {'a':10, 'b':7}
-
-
 #actual tests
 def test_Reader_new_raises():    
     with pytest.raises(TypeError):
@@ -62,6 +55,7 @@ def test_Reader_fmap():
 
 
 def test_Reader_apply():
+    env = {'a':10, 'b': 7}
     r = add_two & R
     s = r * R(inc3) * R(mul100)
     a = R(itemgetter('a'))
@@ -88,6 +82,16 @@ def test_Reader_bind():
     t = s >> madd
     assert s(1) == 3
     assert t(1) == 4
+
+
+def test_Reader_pull_from_env():
+    c = R(itemgetter('a')) >> (lambda a:
+        R(itemgetter('b')) >> (lambda b:
+        (a+b) & R                     ))
+    
+    assert c({'a':10, 'b':7}) == 17
+    assert c({'a': [1], 'b': [2]}) == [1,2]
+
 
 
 def test_Reader_bind_meta():

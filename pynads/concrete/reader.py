@@ -265,6 +265,11 @@ class Reader(Monad):
             (R f) >>= g = R $ \e -> let a = f e
                                         r = g a
                                     in runR r e
+
+            --it could also be broken down like this:
+            r >>= g = R $ \e -> let a = runR r e
+                                    s = g a
+                                 in runR s e
         
         Keep in mind, this implementation of Reader utilizes Python's callable
         object protocol instead of defining an exterior function (runR).
@@ -274,6 +279,18 @@ class Reader(Monad):
         >>> s = R(inc) >> minc 
         >>> s(1)
         ... 3
+
+        To pull from an environment, you need to nest lambdas (yuck)
+        where each nested lambda accepts the result of the former call
+        and the final lambda preforms some sort of computation.
+        Example taken from:
+        <http://www.dustingetz.com/2012/10/02/reader-writer-state-monad-in-python.html>
+
+        >>> computation = R(itemgetter('a')) >> (lambda a:
+        ...               R(itemgetter('b')) >> (lambda b:
+        ...               (a+b) & R                     ))
+        >>> computation({'a':10, 'b': 7})
+        ... 17
         """
         def bound(env, f=self, g=g):
             """First run the function stored in this instance with the
@@ -282,9 +299,9 @@ class Reader(Monad):
             call the returned reader with the environment to get a result.
             """
             # compare to:
-            # let a = f e
-            #     r = g a
-            # in runR r e
+            # let a = runR r e
+            #     s = g a
+            # in runR s e
             a = f(env)
             r = g(a)
             return r(env)
