@@ -2,6 +2,7 @@ from ..abc import Monad
 from ..utils import iscallable, _get_name, _get_names
 from ..funcs import const, compose
 
+
 class Reader(Monad):
     """Monadic wrapper around a function. Compare to a Haskell implementation
     (where R is short for Reader):
@@ -22,7 +23,7 @@ class Reader(Monad):
         instance Monad (R e) where
             return x = R $ \_ -> x
             r >>= g = R $ \e -> runR (g (runR r e)) e
-    
+
 
     To understand the `>>=` definition, break it down as...
 
@@ -49,7 +50,7 @@ class Reader(Monad):
     Each function in the bind chain needs to return an instance of Reader
     when provided with an input:
 
-    >>> def inc(x): 
+    >>> def inc(x):
     ...     return x+1
     >>> def adder(x):
     ...     def add(y):
@@ -90,15 +91,15 @@ class Reader(Monad):
             runR (R f) e = f e
 
         It's a thin wrapper around a function that accepts an input of type `e`
-        and outputs a result of type `a`. `e` can be anything. The record syntax
-        (the first definition) simply defines a "selector function" to easily
-        extract the stored function, where as the second definition defines
-        the extractor externally.
+        and outputs a result of type `a`. `e` can be anything. The record
+        syntax (the first definition) simply defines a "selector function" to
+        easily extract the stored function, where as the second definition
+        defines the extractor externally.
 
         Since the Reader monad is simply a wrapper around a function call,
         the easiest way to emulate this in Python to define `__call__` that
-        accepts an input and runs the stored function with that input, returning
-        the result to the caller.
+        accepts an input and runs the stored function with that input,
+        returning the result to the caller.
         """
         return self.v(env)
 
@@ -224,7 +225,7 @@ class Reader(Monad):
         # compare to:
         # let (R f) = rf
         #     (R g) = rg
-        # in R $ \y -> (f y) (g y)        
+        # in R $ \y -> (f y) (g y)
         def applied(env, f=self, g=applicative):
             """First supply the environment to this Reader to get a function
             back. And then call the returned function with the result of
@@ -270,13 +271,13 @@ class Reader(Monad):
             r >>= g = R $ \e -> let a = runR r e
                                     s = g a
                                  in runR s e
-        
+
         Keep in mind, this implementation of Reader utilizes Python's callable
         object protocol instead of defining an exterior function (runR).
 
         >>> inc = lambda x: x+1
         >>> minc = lambda x: Reader(lambda y: x+y+1))
-        >>> s = R(inc) >> minc 
+        >>> s = R(inc) >> minc
         >>> s(1)
         ... 3
 
@@ -307,7 +308,7 @@ class Reader(Monad):
             return r(env)
 
         names = _get_names(self.v, g)
-        bound.__doc__  = "Bind of {!s}".format(', '.join(names))
+        bound.__doc__ = "Bind of {!s}".format(', '.join(names))
         bound.__name__ = '_x_'.join(names)
 
         return self.__class__(bound)

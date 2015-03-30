@@ -5,6 +5,7 @@ from .utils import _get_names, _get_name
 __all__ = ('fmap', 'unit', 'multiapply', 'lift', 'multibind', 'const',
            'identity', 'compose')
 
+
 def fmap(f, functor):
     """Callable form of fmap."""
     return functor.fmap(f)
@@ -107,7 +108,6 @@ def compose(*fs):
         return identity
     elif len(fs) == 1:
         return fs[0]
-
 
     def composed(*a, **k):
         ret = fs[-1](*a, **k)

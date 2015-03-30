@@ -19,8 +19,9 @@ class ApplicativeMeta(ABCMeta):
     def __rand__(self, other):
         return self.unit(other)
 
+
 class Applicative(with_metaclass(ApplicativeMeta, Functor)):
-    """Applicative Functors are data types that can store potential 
+    """Applicative Functors are data types that can store potential
     computations. Since Applicative Functors are also functors, they are also
     mappable and must implement the `fmap` method.
 
@@ -29,7 +30,8 @@ class Applicative(with_metaclass(ApplicativeMeta, Functor)):
     ``apply`` is the way applicative interactive with each other. The initial
     Applicative needs to be a function that will accept all following
     Applicatives as arguments. It's possible to chain multiple calls to
-    apply together if the initial function accepts 
+    apply together if the initial function returns a function
+    (or is curried).
 
     >>> S_mul_two  Something.unit(curry(lambda x, y: x*y))
     >>> S_mul_two.apply(Something(4)).apply(Something(5))

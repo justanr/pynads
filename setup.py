@@ -1,6 +1,8 @@
-import os, sys
+import os
+import sys
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
+
 
 class PyTest(TestCommand):
     # Taken from py.test setuptools integration page
@@ -22,7 +24,9 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-tests_require = ['py', 'pytest'] 
+
+tests_require = ['py', 'pytest']
+
 
 if __name__ == "__main__":
 
@@ -37,5 +41,4 @@ if __name__ == "__main__":
         keywords="monad functor applicative",
         test_suite='tests',
         tests_require=tests_require,
-        cmdclass = {'test' : PyTest}
-        )
+        cmdclass={'test': PyTest})

@@ -1,12 +1,13 @@
 from abc import abstractmethod
 from .applicative import Applicative
 
+
 class Monad(Applicative):
     """Base Monad class. Provides an abstract bind method
     as well as two concrete methods: >> and <<=. These are
     in addition to the abstract and concrete methods provided
     by Applicative.
-    
+
     ``bind`` should provide a value (or values) from the Monad
     to a function that returns a Monad. However, there's no way
     to reasonably enforce this in Python, so it's a contract.
@@ -56,7 +57,7 @@ class Monad(Applicative):
     def __ilshift__(self, f):
         """Helper operator. The same as using bind or >> but
         as an assignment operator. The return value is *new* monad
-        not an altered one. 
+        not an altered one.
 
         >>> m = Right(4)
         >>> m <<= lambda x: Right(x+2) if x < 1 else Left("greater than 1")

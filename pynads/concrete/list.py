@@ -1,11 +1,12 @@
-from collections.abc import Sequence, Mapping, Iterable
-from itertools import chain
+from collections.abc import Sequence, Iterable
+from itertools import chain, repeat
+from types import GeneratorType
 from ..abc import Monad
 from ..funcs import fmap
 from ..utils import _iter_but_not_str_or_map
 
 
-__all__ = ('List',)
+__all__ = ('List', 'Generator')
 
 
 class List(Monad, Sequence):
@@ -33,7 +34,7 @@ class List(Monad, Sequence):
     >>> fs = [add_two, mul_two] & List
     >>> fs * ([1,4,9] & List)
     ... List(2,8,18,3,6,11)
-    
+
     Despite the name, this Monad is closer to Python's ``tuple`` than ``list``
     this is because Haskell's lists are immutable. List doesn't support
     item assignment after creation.
@@ -81,25 +82,31 @@ class List(Monad, Sequence):
 
         else:
             body = ','.join([str(v) for v in self.v])
-        
+
         return main.format(body)
 
     @classmethod
     def unit(cls, v):
+        """The most basic context for a List monad is a value in a tuple.
+        However, it's likely that strings and mappings shouldn't be splatted
+        into the delegated tuple.
+
+        If that's the desired behavior,
+        """
         if _iter_but_not_str_or_map(v):
             return cls(*v)
         return cls(v)
 
     def fmap(self, f):
-        return List(*[f(v) for v in self.v])
+        return self.unit([f(v) for v in self.v])
 
     def apply(self, applicative):
         vals = [f(x) for f in self.v for x in applicative.v]
-        return List(*vals)
+        return self.unit(vals)
 
     def bind(self, f):
-        return List(*chain.from_iterable(fmap(f, self)))
-    
+        return self.unit(chain.from_iterable(fmap(f, self)))
+
     # here be boring stuff...
     def __hash__(self):
         return hash(("List", self.v))
@@ -138,7 +145,7 @@ class List(Monad, Sequence):
 
     def __add__(self, other):
         if isinstance(other, List):
-           return List.unit(self.v + other.v)
+            return List.unit(self.v + other.v)
         elif isinstance(other, tuple):
             return List.unit(self.v + other)
         raise TypeError("can only concatenate tuple or List with List")

@@ -33,7 +33,7 @@ def _single_value_iter(x):
 def with_metaclass(meta, *bases):
     """Creates an anonymous object with a metaclass. Allows compatibility
     between Python2 and Python3.
-    
+
     >>> class MyThing(with_metaclass(type)):
     ...     pass
     >>> MyThing.__mro__

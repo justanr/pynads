@@ -3,6 +3,7 @@ from ..abc import Monad
 from ..funcs import fmap
 from .list import List
 
+
 class Writer(Monad):
     """Stores a value as well as a log of events that have transpired
     with the value.

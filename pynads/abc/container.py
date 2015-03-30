@@ -6,8 +6,8 @@ class Container(object):
     should pass back to ``Container.__init__`` via super.
 
     This class is the endpoint for any super() calls relating to
-    ``__init__`` and ``_get_val`` unless multiple inheritance is used, 
-    in which another class may also be called with these 
+    ``__init__`` and ``_get_val`` unless multiple inheritance is used,
+    in which another class may also be called with these
     methods (including ``object``).
 
     The value contained in this class is a *strong* reference by default.
@@ -20,8 +20,6 @@ class Container(object):
     """
     __slots__ = ('_v', '__weakref__')
 
-    # accept *args, **kwargs for co-op inheritance with super
-    # note: Container is the endpoint for 
     def __init__(self, v=None, *a, **k):
         self._v = v
 

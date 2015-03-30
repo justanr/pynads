@@ -9,7 +9,7 @@ __all__ = ('Maybe', 'Just', 'Nothing')
 
 class Maybe(Monad):
     """Represents a potential computation.
-    
+
     The actual constructor for Maybe doesn't return an instance of Maybe
     but instead an instance of Just or the singleton Nothing.
 
@@ -57,9 +57,10 @@ class Just(Maybe):
             return self.v == other.v
         return NotImplemented
 
+
 class _Nothing(Maybe):
     """Singleton class representing a monadic failure in a computation.
-    
+
     fmap, apply and bind all return the singleton instance of Nothing
     and short circuits all further bind operations.
     """
