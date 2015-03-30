@@ -1,4 +1,3 @@
-from functools import update_wrapper
 from ..abc import Monad
 from ..utils import iscallable, _get_name, _get_names
 from ..funcs import const, compose
