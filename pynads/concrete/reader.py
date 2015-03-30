@@ -212,6 +212,14 @@ class Reader(Monad):
         >>> s = (add & Reader) * Reader(inc_three) * Reader(mul_100)
         >>> s(5) # compare: runR s 5
         ... 508
+
+        Similarly, we can pull information from a dictionary as well:
+
+        >>> from operator import itemgetter
+        >>> r = (add & Rader)
+        >>> t = r >> Reader(itemgetter('a')) >> Reader(itemgetter('b')
+        >>> t({'a':10, 'b':7})
+        ... 17
         """
         # compare to:
         # let (R f) = rf
