@@ -24,7 +24,6 @@ def test_propagate_self():
 
 
 def test_with_metaclass():
-    
     class MyMeta(type):
         pass
 
