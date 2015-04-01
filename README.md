@@ -176,17 +176,17 @@ understanding of how each monad operates in Haskell. I doubt I'll list all
 of them here as some were found by desperate Google searching and I've
 forgotten to record them somewhere.
 
-- `PyMonad <https://bitbucket.org/jason_delaat/pymonad>`_ (original inspiration)
-- `Valued Lessons <http://www.valuedlessons.com/2008/01/monads-in-python-with-nice-syntax.html>`_
-- `All About Monads <https://wiki.haskell.org/All_About_Monads>`_
-- `Learn You A Haskell <http://learnyouahaskell.com/>`_
-- `Dustin Getz - Dustin’s awesome monad tutorial for humans, in Python  <http://www.dustingetz.com/2012/04/07/dustins-awesome-monad-tutorial-for-humans-in-python.html>`_
-- `Dustin Gets - Writer, Reader, and State monads in Python <http://www.dustingetz.com/2012/10/02/reader-writer-state-monad-in-python.html>`_
-- `The State Monad <https://acm.wustl.edu/functional/state-monad.php>`_
-- `The Day Python Embarrassed Imperative Programming <http://the-27th-comrade.appspot.com/blog/ahJzfnRoZS0yN3RoLWNvbXJhZGVyDAsSBUVudHJ5GOFdDA>`_
-- `You Could Have Invented Monads <http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html>`_
-- `Monads, or Programmable Semicolons <http://zacharyvoase.com/2014/04/30/monads/>`_
-- `bitemyapp Monad Transformers presentation <https://github.com/bitemyapp/presentations/tree/master/monad_transformers>`_
-- `Don't Fear The Monad (video) <http://www.youtube.com/attribution_link?a=o2IwOJe4Tk3p2xPSEti5Fw&u=%2Fwatch%3Fv%3DZhuHCtR3xq8%26feature%3Dshare>`_
-- `Stephen Boyer - Monads, Part 1: A Design Pattern <http://www.stephanboyer.com/post/9/monads-part-1-a-design-pattern>`_
+- [PyMonad](https://bitbucket.org/jason_delaat/pymonad>) (original inspiration)
+- [Valued Lessons](http://www.valuedlessons.com/2008/01/monads-in-python-with-nice-syntax.html)
+- [All About Monads](https://wiki.haskell.org/All_About_Monads)
+- [Learn You A Haskell](http://learnyouahaskell.com/)
+- [Dustin Getz - Dustin’s awesome monad tutorial for humans, in Python](http://www.dustingetz.com/2012/04/07/dustins-awesome-monad-tutorial-for-humans-in-python.html)
+- [Dustin Gets - Writer, Reader, and State monads in Python](http://www.dustingetz.com/2012/10/02/reader-writer-state-monad-in-python.html)
+- [The State Monad](https://acm.wustl.edu/functional/state-monad.php)
+- [The Day Python Embarrassed Imperative Programming](http://the-27th-comrade.appspot.com/blog/ahJzfnRoZS0yN3RoLWNvbXJhZGVyDAsSBUVudHJ5GOFdDA)
+- [You Could Have Invented Monads](http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html)
+- [Monads, or Programmable Semicolons](http://zacharyvoase.com/2014/04/30/monads/)
+- [bitemyapp Monad Transformers presentation](https://github.com/bitemyapp/presentations/tree/master/monad_transformers)
+- [Don't Fear The Monad (video)](http://www.youtube.com/attribution_link?a=o2IwOJe4Tk3p2xPSEti5Fw&u=%2Fwatch%3Fv%3DZhuHCtR3xq8%26feature%3Dshare)
+- [Stephen Boyer - Monads, Part 1: A Design Pattern](http://www.stephanboyer.com/post/9/monads-part-1-a-design-pattern)
 - Others which I have forgotten
