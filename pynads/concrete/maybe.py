@@ -27,7 +27,7 @@ class Maybe(Monad):
 
        instance Applicative Maybe where
            pure             = Just
-           Nothing <*> _    = Nothing
+           Nothing  <*> _   = Nothing
            (Just f) <*> x   = fmap f x
 
        instance Monad Maybe where
@@ -106,9 +106,6 @@ class Maybe(Monad):
 
 class Just(Maybe):
     """Represents a value from a calculation.
-
-    Just will act as a proxy for all methods found on its value *except*
-    for __repr__, __name__, fmap, apply and bind.
     """
     __slots__ = ()
 
