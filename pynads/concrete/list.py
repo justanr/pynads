@@ -1,12 +1,11 @@
 from collections.abc import Sequence, Iterable
-from itertools import chain, repeat
-from types import GeneratorType
+from itertools import chain
 from ..abc import Monad
 from ..funcs import fmap
 from ..utils import _iter_but_not_str_or_map
 
 
-__all__ = ('List', 'Generator')
+__all__ = ('List',)
 
 
 class List(Monad, Sequence):
