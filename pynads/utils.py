@@ -38,7 +38,7 @@ def with_metaclass(meta, *bases):
     >>> class MyThing(with_metaclass(type)):
     ...     pass
     >>> MyThing.__mro__
-    ... (MyThing, NewBase, object)
+    ... (MyThing, typeBase, object)
     """
     name = "{!s}Base".format(meta.__name__)
     return meta(name, bases, {})
