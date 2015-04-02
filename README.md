@@ -1,5 +1,8 @@
 #pynads
 
+> A monad is just a monoid in the category of endofunctors, what's the problem?
+> [-Philip Wadler](http://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html)
+
 Just playing around with implementing monads in Python.
 
 There's also a little metaclass muckery thrown in for good measure!
@@ -43,7 +46,7 @@ Unit on other Monads:
 4 & Either # outputs Right(4)
 4 & List   # outputs List(4)
 4 & Writer # outputs Writer(4, List())
-4 & Map    # outputs Map({4: None})
+('a', 4) & Map    # outputs Map({4: None})
 4 & Reader # outputs Reader(const(4))
 ```
 
@@ -156,13 +159,28 @@ fake_curry = lambda x: lambda y: lambda z: x+y+z
 multiapply(Just(fake_curry), Just(1), Just(2), Just(3))
 ```
 
+###Monoids!
+Sure, why not. `pynads` has an abstract Monoid base class at
+`pynads.abc.monoid.Monoid` (but just `from pynads import Monoid`).
+
+The Monoid abstract base class allows joining together monoids with the `+`
+operator (or `sum` or whatever) by defining an `mappend` method which `+`
+will delegate to. In addition, the monoid must define an `mempty` value
+which represents its "empty" or "zero" value.
+
+This class also provides a default implementation of mconcat which uses
+`functools.reduce` and the `mappend` method defined in the instance. However,
+this could likely be replaced by `sum` -- considerations for the future.
+Subclasses of Monoid are welcome to replace `mconcat` with their own versions.
+
+`pynads` has two monoids: `pynads.List` and `pynads.Map`
+
 ##Coming Soon!
 Despite this being a toy implementation of Haskell things in Python, I've
 taken quite a shine to it. Currently, these are the things in the works:
 
 - State Monad (seems pretty similar to Reader, shouldn't be hard to hammer out)
 - do notation (by abusing the coroutine protocol and decorators)
-- Monoids (specifically MonoidPlus)
 - Expanded notes section so if something seems really odd, you can see my
 thought process and the notes I've taken.
 - Expanded docstrings on par with Reader's documentation. Despite being a huge
