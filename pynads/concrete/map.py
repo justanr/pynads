@@ -1,8 +1,9 @@
 from collections import Mapping
-from ..abc import Applicative
+from ..abc import Applicative, Monoid
+from ..utils import chain_dict_update
 
 
-class Map(Applicative, Mapping):
+class Map(Applicative, Monoid, Mapping):
     """An attempt at implementing a Python dictionary as a Applicative Functor.
 
     Similar to Haskell's Data.Map datatype but also serving as an
@@ -13,7 +14,23 @@ class Map(Applicative, Mapping):
     - Data.Map is a balanced binary tree, dict is a hash table
     - Data.Map can support more data type (must only be Ord k) where as
     dict requires its keys to be hashable (i.e. non-mutable).
+
+    The Functor implementation for Map simply maps a function over the values
+    of the internal dictionary.
+
+    The Applicative instance for Map takes a Map that holds callables as values
+    and matches them to inputs in the joining Maps. If a key is found to not
+    exist in any of these mappings, then it is discarded rather than attempting
+    to hold on to it.
+
+    Map is also a Monoid. It's mempty is simply an empty dictionary, and its
+    mappend and mconcat are functionally the same. Both delegate to a helper
+    function which updates a blank dictionary from one or more joining
+    dictionaries. In both instances, if a key appears in multiple maps,
+    then the last appearance wins.
     """
+    __slots__ = ()
+    mempty = {}
 
     def __init__(self, v=None, **kwds):
         data = {}
@@ -76,6 +93,20 @@ class Map(Applicative, Mapping):
         """
         return cls(dict.fromkeys(keys, value))
 
+    def mappend(self, other):
+        """Joining two mapping together is as easy as creating a new mapping
+        representing the values from both mappings.
+        """
+        return self.__class__(chain_dict_update(self, other))
+
+    @classmethod
+    def mconcat(cls, *ds):
+        """Similar to pynads.concrete.list.List, Map provides its own
+        implementation of mconcat so it doesn't create a bunch of
+        orphanded dictionaries to be garbage collected.
+        """
+        return cls(chain_dict_update(*ds))
+
     # from collections.Mapping
     def __len__(self):
         return len(self.v)
@@ -88,3 +119,15 @@ class Map(Applicative, Mapping):
 
     def __getitem__(self, k):
         return self.v[k]
+
+    # niceities
+    def keys(self):
+        return self.v.keys()
+
+    def __eq__(self, other):
+        if isinstance(other, Map):
+            return self.v == other.v
+        return NotImplemented
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

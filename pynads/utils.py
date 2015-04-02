@@ -5,7 +5,7 @@ from inspect import isfunction
 
 __all__ = ('_iter_but_not_str_or_map', '_propagate_self',
            '_single_value_iter', 'with_metaclass', '_get_names',
-           '_get_name', 'iscallable')
+           '_get_name', 'iscallable', 'chain_dict_update')
 
 
 def _iter_but_not_str_or_map(x):
@@ -83,3 +83,17 @@ def _get_names(*fs):
         else:
             names.append(_get_name(f))
     return names
+
+
+def chain_dict_update(*ds):
+    """Updates multiple dictionaries into one dictionary.
+    If the same key appears multiple times, then the last appearance wins.
+
+    >>> m, n, o = {'a':10}, {'b':7}, {'a':4}
+    >>> chain_dict_updates(m, n, o)
+    ... {'b': 7, 'a': 4}
+    """
+    dct = {}
+    for d in ds:
+        dct.update(d)
+    return dct

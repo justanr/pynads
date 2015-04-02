@@ -90,4 +90,21 @@ def test_get_names():
 
     assert utils._get_names(*fs) == ['inc', 'partialed inc', 'Test']
     assert utils._get_names(dummy) == ['inc', 'partialed inc', 'Test']
-    assert utils._get_names(inc, dummy) == ['inc', 'inc', 'partialed inc', 'Test']
+    assert utils._get_names(inc, dummy) == \
+           ['inc', 'inc', 'partialed inc', 'Test']
+
+
+def test_chain_dict_update():
+    m = {'a': 10}
+    n = {'b': 7}
+    o = {'c': 4}
+
+    assert utils.chain_dict_update(m, n, o) == {'a':10, 'b': 7, 'c': 4}
+
+
+def test_chain_dict_update_last_appearance_wins():
+    m = {'a': 10}
+    n = {'a': 7}
+    o = {'a': 4}
+
+    assert utils.chain_dict_update(m, n, o) == {'a': 4}
