@@ -31,6 +31,7 @@ def test_with_metaclass():
         pass
 
     assert isinstance(Test, MyMeta)
+    assert "MyMetaBase" in [c.__name__ for c in Test.mro()]
 
 def test_single_value_iter():
     i = utils._single_value_iter(1)

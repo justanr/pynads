@@ -1,4 +1,5 @@
 from collections.abc import Iterable, Mapping
+from functools import wraps, partial
 from inspect import isfunction
 
 
@@ -39,7 +40,8 @@ def with_metaclass(meta, *bases):
     >>> MyThing.__mro__
     ... (MyThing, NewBase, object)
     """
-    return meta("NewBase", bases, {})
+    name = "{!s}Base".format(meta.__name__)
+    return meta(name, bases, {})
 
 
 def iscallable(f):
