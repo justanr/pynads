@@ -5,7 +5,7 @@ class Container(object):
     arguments (see ``pynads.conrete.writer.Writer``) but these classes
     should pass back to ``Container.__init__`` via super.
 
-    This class is the endpoint for any super() calls relating to
+    This class is the endpoint for any super() calls relating to ``_new__``,
     ``__init__`` and ``_get_val`` unless multiple inheritance is used,
     in which another class may also be called with these
     methods (including ``object``).
@@ -19,6 +19,9 @@ class Container(object):
     default implementation of ``Container._get_val``
     """
     __slots__ = ('_v', '__weakref__')
+
+    def __new__(cls, *a, **k):
+        return object.__new__(cls)
 
     def __init__(self, v=None, *a, **k):
         self._v = v
