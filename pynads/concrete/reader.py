@@ -1,6 +1,7 @@
-from ..abc import Monad
+from functools import update_wrapper
+from ..abc import Monad, Container
 from ..utils import iscallable, _get_name, _get_names
-from ..funcs import const, compose
+from ..funcs import const, compose, identity
 
 
 class Reader(Monad):
@@ -79,7 +80,7 @@ class Reader(Monad):
     def __new__(self, v):
         if not iscallable(v):
             raise TypeError("expected callable type to be passed")
-        return object.__new__(self)
+        return Container.__new__(self)
 
     def __call__(self, env):
         """In Haskell, Reader is defined like this:
@@ -318,3 +319,19 @@ class Reader(Monad):
 # it makes sense to alias it to Function as well
 # though, it will still represent as Reader when introspected
 Function = Reader
+
+
+# emulate Haskell's ask and local Reader helpers
+def ask():
+    """Returns the current environment in a Reader's computation.
+    """
+    return Reader(identity)
+
+
+def local(changer):
+    """Manipulates the current environment by executing a function over it.
+    """
+    def env_changer(env):
+        new_env = changer(env)
+        return new_env
+    return Reader(update_wrapper(env_changer, local))

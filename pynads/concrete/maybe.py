@@ -1,6 +1,6 @@
 from collections import namedtuple
 from ..funcs import fmap
-from ..abc import Monad
+from ..abc import Monad, Container
 from ..utils import _propagate_self
 
 
@@ -94,7 +94,9 @@ class Maybe(Monad):
     __slots__ = ()
 
     def __new__(self, v, checker=lambda v: v is not None):
-        return Just(v) if checker(v) else Nothing
+        if checker(v):
+            return super(Maybe, self).__new__(Just, v)
+        return Nothing
 
     def __bool__(self):
         return isinstance(self, Just)
@@ -110,7 +112,7 @@ class Just(Maybe):
     __slots__ = ()
 
     def __new__(cls, v):
-        return object.__new__(cls)
+        return Container.__new__(cls)
 
     def __repr__(self):
         return "Just {!r}".format(self.v)
@@ -141,7 +143,7 @@ class _Nothing(Maybe):
 
     def __new__(self, value=None):
         if self.__inst is None:
-            self.__inst = object.__new__(self)
+            self.__inst = Container.__new__(self)
         return self.__inst
 
     def __repr__(self):
