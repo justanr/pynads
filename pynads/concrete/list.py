@@ -128,10 +128,6 @@ class List(Monad, Monoid, Sequence):
         """
         return cls.unit(chain(*monoids))
 
-    # direct to Monoidal add, which just directs to mappend
-    def __add__(self, other):
-        return Monoid.__add__(self, other)
-
     # here be boring stuff...
     def __hash__(self):
         return hash(("List", self.v))
