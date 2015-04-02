@@ -1,3 +1,4 @@
+import pytest
 from pynads import List, multiapply
 
 
@@ -14,6 +15,34 @@ def test_List_mappend():
     m = List(1,2,3)
     n = List(4)
     assert m.mappend(n) == List(1,2,3,4)
+
+
+def test_List_add_other_iters():
+    control = List(1,2,3,4)
+    m = List(1,2,3)
+    n = iter([4])
+    o = (4, )
+    p = {4}
+
+    assert all(control == (m+x) for x in [n,o,p])
+
+
+def test_List_add_raises_with_str():
+    l = List()
+
+    with pytest.raises(TypeError) as error:
+        l + 'a'
+
+    assert 'str' in str(error.value)
+
+
+def test_List_add_raises_with_mapping():
+    l = List()
+
+    with pytest.raises(TypeError) as error:
+        l + {'a':10}
+
+    assert 'dict' in str(error.value)
 
 
 def test_List_mondoial_add():

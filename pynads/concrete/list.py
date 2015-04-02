@@ -114,11 +114,14 @@ class List(Monad, Monoid, Sequence):
         return self.unit(chain.from_iterable(fmap(f, self)))
 
     def mappend(self, other):
-        if isinstance(other, List):
-            return self.unit(self.v + other.v)
-        elif isinstance(other, tuple):
-            return self.unit(self.v + other)
-        raise TypeError("can only concatenate tuple or List with List")
+        """Chains together an instance of List with a non-str/Mapping
+        iterable to produce a new List instance containing all values.
+        """
+        if not _iter_but_not_str_or_map(other):
+            msg = "Can only mappend non-str/Mapping iter with {!s}" \
+                  "not {!r}".format(self.__class__.__name__, type(other))
+            raise TypeError(msg)
+        return self.unit(chain(self, other))
 
     @classmethod
     def mconcat(cls, *monoids):
