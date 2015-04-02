@@ -1,6 +1,6 @@
 from collections.abc import Sequence, Iterable
 from itertools import chain
-from ..abc import Monad
+from ..abc import Monad, Monoid
 from ..funcs import fmap
 from ..utils import _iter_but_not_str_or_map
 
@@ -8,7 +8,7 @@ from ..utils import _iter_but_not_str_or_map
 __all__ = ('List',)
 
 
-class List(Monad, Sequence):
+class List(Monad, Monoid, Sequence):
     """Monadic list.
 
     The List monad can be used to deal with non-deterministic results:
@@ -62,6 +62,7 @@ class List(Monad, Sequence):
     water as well.
     """
     __slots__ = ()
+    mempty = ()
 
     def __init__(self, *vs):
         # rather than tyring to do all sorts of
@@ -72,7 +73,7 @@ class List(Monad, Sequence):
         super(List, self).__init__(vs)
 
     def __repr__(self):
-        main = "List({!s})"
+        main = "{!s}({!s})"
         if len(self) > 10:
             head = self.v[:5]
             middle = '...{!s} more...'.format(len(self) - 10)
@@ -82,7 +83,7 @@ class List(Monad, Sequence):
         else:
             body = ','.join([str(v) for v in self.v])
 
-        return main.format(body)
+        return main.format(self.__class__.__name__, body)
 
     @classmethod
     def unit(cls, v):
@@ -106,6 +107,17 @@ class List(Monad, Sequence):
     def bind(self, f):
         return self.unit(chain.from_iterable(fmap(f, self)))
 
+    def mappend(self, other):
+        if isinstance(other, List):
+            return self.unit(self.v + other.v)
+        elif isinstance(other, tuple):
+            return self.unit(self.v + other)
+        raise TypeError("can only concatenate tuple or List with List")
+
+    # direct to Monoidal add, which just directs to mappend
+    def __add__(self, other):
+        return Monoid.__add__(self, other)
+
     # here be boring stuff...
     def __hash__(self):
         return hash(("List", self.v))
@@ -120,7 +132,7 @@ class List(Monad, Sequence):
             return not self.v == other.v
         return NotImplemented
 
-    # functools.total_ordering
+    # functools.total_ordering (2.7+)
     # I miss thee! D:
     def __lt__(self, other):
         if isinstance(other, List):
@@ -141,13 +153,6 @@ class List(Monad, Sequence):
         if isinstance(other, List):
             return self.v >= other.v
         return NotImplemented
-
-    def __add__(self, other):
-        if isinstance(other, List):
-            return List.unit(self.v + other.v)
-        elif isinstance(other, tuple):
-            return List.unit(self.v + other)
-        raise TypeError("can only concatenate tuple or List with List")
 
     def __iadd__(self, other):
         return self + other

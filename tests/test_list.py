@@ -5,14 +5,39 @@ add_two = lambda x: x+2
 plus_or_minus_two = lambda x: [x-2, x+2]
 plus_other = lambda x: lambda y: x+y
 
+
+def test_List_mempty():
+    assert List.mempty == ()
+
+
+def test_List_mappend():
+    m = List(1,2,3)
+    n = List(4)
+    assert m.mappend(n) == List(1,2,3,4)
+
+
+def test_List_mondoial_add():
+    l = 1 & List
+    assert l + (2 & List) == [1,2] & List
+    assert l + (2,) == [1,2] & List
+
+
 def test_List_handles_str():
     l = List("fred")
     assert l.v == ("fred",)
 
 
-def test_List_handles_seq():
+def test_List_handles_map():
     assert List({1,2,3}).v == ({1,2,3},)
+
+
+def test_List_handles_seq():
     assert List(*range(3)).v == (0,1,2)
+
+
+def test_List_handles_gen():
+    gen_list = iter([1,2,3]) & List
+    assert gen_list.v == (1,2,3)
 
 
 def test_List_repr():
@@ -79,11 +104,6 @@ def test_List_contains():
 def test_List_len():
     assert len(([1,2,3] & List)) == 3
 
-
-def test_List_add():
-    l = 1 & List
-    assert l + (2 & List) == [1,2] & List
-    assert l + (2,) == [1,2] & List
 
 def test_List_iadd():
     l1 = l2 = 1 & List
