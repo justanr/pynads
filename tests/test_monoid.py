@@ -25,3 +25,13 @@ def test_Monoid_searches_mro():
 
     assert Test()
     assert Test.mempty is None
+
+
+def test_Monoid_default_mappend():
+    class Test(Monoid):
+        mempty = 0
+
+        def mappend(self, other):
+            return Test(self.v + other.v)
+
+    assert Test.mconcat(Test(1), Test(2)).v == Test(3).v

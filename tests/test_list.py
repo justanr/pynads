@@ -22,6 +22,18 @@ def test_List_mondoial_add():
     assert l + (2,) == [1,2] & List
 
 
+def test_List_mconcat():
+    ls = [x & List for x in range(4)]
+    final = List.mconcat(*ls)
+    assert final == List(0,1,2,3)
+
+
+def test_List_is_monoidal():
+    ls = [x & List for x in [1,2,3]]
+    assert List.mappend(ls[0], List.mappend(ls[1], ls[2])) == \
+           List.mappend(List.mappend(ls[0], ls[1]), ls[2])
+
+
 def test_List_handles_str():
     l = List("fred")
     assert l.v == ("fred",)

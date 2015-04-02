@@ -60,6 +60,12 @@ class List(Monad, Monoid, Sequence):
     Unlike Haskell, this process is *eager* so passing an infinite sequence
     will just cause it to compute forever, probably blowing memory out of the
     water as well.
+
+    List is also monoidal. It's mempty unit is an empty tuple and mappend
+    is simply tuple addition. List provides its own mconcat method which
+    uses itertools.chain to create a single consumable iterator rather than
+    creating many List instances in between the beginning and final results
+    similar to ``str.join`` vs ``str1 + str2 + str3 + ...``.
     """
     __slots__ = ()
     mempty = ()
@@ -113,6 +119,14 @@ class List(Monad, Monoid, Sequence):
         elif isinstance(other, tuple):
             return self.unit(self.v + other)
         raise TypeError("can only concatenate tuple or List with List")
+
+    @classmethod
+    def mconcat(cls, *monoids):
+        """Rather using what amounts to reduce(add, *monoids, ()), List's
+        mconcat uses itertools.chain to create a single iterator out of many
+        and feeds that to List.unit.
+        """
+        return cls.unit(chain(*monoids))
 
     # direct to Monoidal add, which just directs to mappend
     def __add__(self, other):

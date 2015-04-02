@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from functools import reduce
 from .container import Container
 from ..utils import with_metaclass
 
@@ -58,14 +59,35 @@ class Monoid(with_metaclass(ABCMeta, Container)):
     `(+) 1 1` is two. So it's important to consider the implication of how
     mappend is implemented before deciding what the "Zero value" is.
 
+    While pynads will not enforce this, to be consider a proper monoid,
+    a monoidal structure must statisfy an additional requirement: the
+    structure's mappend must be transative. That is:
+
+        .. code-block:: Haskell
+            mappend x (mappend y z) == mappend (mappend x y) z
+
+    Similar to how:
+
+        .. code-block:: Python
+            1 + (2 + 3) == (1 + 2) + 3
+
+    Rather, it is up the implementations of Monoid to fulfill this requirement.
+
     In the context of `pynads`, Monoid serves as an interface. It defines
-    an operator `+` which calls the mappend method on the other object. Like
-    Haskell, it provides a default implementation of mconcat via reduce.
+    an operator `+` which calls the mappend method with the instance and
+    other object as arguments. And, like Haskell, it provides a default
+    implementation of mconcat via reduce.
+
     Monoid also defines one abstract method and "an abstract property":
 
     - mappend needs to be defined so two monoidal values can be joined
     - mempty needs to be an attribute at the class level that represents
     the zero value of the monoidal structure.
+
+    Since there's already `__new__` and metaclass muckery elsewhere in
+    `pynads`, enforcement of having mempty is handled by Monoid's `__new__`
+    method which introspects the class upon instantiation and raises a
+    TypeError when it doesn't find mempty in the MRO.
 
     If multiple monoidal types are needed from one structure, it's best
     to create a parent class which inherits from Monoid, and then children
@@ -87,11 +109,6 @@ class Monoid(with_metaclass(ABCMeta, Container)):
 
             def mappend(self, other):
                 return ProdMonoid(self.v * other.v)
-
-    Since there's already `__new__` and metaclass muckery elsewhere in
-    `pynads`, enforcement of having mempty is handled by Monoid's `__new__`
-    method which introspects the class upon instantiation and raises a
-    TypeError when it doesn't find mempty in the MRO.
     """
     __slots__ = ()
 
@@ -108,9 +125,23 @@ class Monoid(with_metaclass(ABCMeta, Container)):
         return self.mappend(other)
 
     @abstractmethod
-    def mappend(self, v):
+    def mappend(self, other):
         """This method should define how to take two monoidal values of
         the same structure and return a single monoidal value of the same
         structure.
         """
         return False
+
+    @classmethod
+    def mconcat(cls, *monoids):
+        """Similar to Haskell, this class also provides a default
+        implementation of mconcat which simply reduces a list of monoids
+        using the monoid's mappend method as the accumulator.
+
+        However, this method may not performant for all monoids. See:
+        ``pynads.concrete.list.List``. In that case, override mconcat
+        as a classmethod and provide an implementation.
+        """
+        if len(monoids) < 2:
+            raise TypeError("Need at least two values for mconcat")
+        return reduce(cls.mappend, monoids)
