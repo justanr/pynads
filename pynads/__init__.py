@@ -1,3 +1,3 @@
 from .abc import *
 from .concrete import *
-from .funcs import *
+from . import funcs

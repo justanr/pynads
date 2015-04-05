@@ -1,5 +1,6 @@
 import pytest
-from pynads import List, multiapply
+from pynads import List
+from pynads.funcs import multiapply
 
 
 add_two = lambda x: x+2

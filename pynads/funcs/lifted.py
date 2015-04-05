@@ -2,20 +2,7 @@ from functools import reduce
 from operator import mul, rshift
 
 
-__all__ = ('fmap', 'unit', 'lift', 'multiapply', 'multibind',
-           'mempty', 'mappend', 'mconcat')
-
-
-_KNOWN_MEMPTIES = {
-    int: 0,
-    list: [],
-    dict: {},
-    set: set(),
-    str: '',
-    float: 0.0,
-    frozenset: frozenset(),
-    tuple: ()
-}
+__all__ = ('fmap', 'unit', 'lift', 'multiapply', 'multibind')
 
 
 def fmap(f, functor):
@@ -27,36 +14,6 @@ def unit(v, applicative):
     """Puts a value in the minimum necessary context to form an Applicative.
     """
     return applicative.unit(v)
-
-
-def mempty(monoid):
-    """Returns the mempty value of a Monoid. If the passed object/class isn't
-    a monoid, this function will return an empty value for a small subset of
-    Python types.
-    """
-
-    if hasattr(monoid, 'mempty'):
-        return monoid.mempty
-    elif type(monoid) in _KNOWN_MEMPTIES:
-        return _KNOWN_MEMPTIES[type(monoid)]
-    else:
-        raise TypeError("No known mempty value for {!r}".format(type(monoid)))
-
-
-def mappend(existing, other):
-    """Joins a monoid with another monoid by using the first monoid's mappend
-    method. This function propagates exceptions if any occur.
-    """
-    return existing.mappend(other)
-
-
-def mconcat(*monoids):
-    """Joins together a sequence of monoids into a single monoid by grabbing
-    the mconcat method off the first monoid and applying it to every monoid
-    in the iterable.
-    """
-    mconcat_ = monoids[0].mconcat
-    return mconcat_(*monoids)
 
 
 def multiapply(initial, *args):

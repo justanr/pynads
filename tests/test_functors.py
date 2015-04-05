@@ -1,5 +1,6 @@
 import pytest
-from pynads import Functor, fmap
+from pynads import Functor
+from pynads.funcs import fmap
 
 class MyFunctor(Functor):
     def fmap(self, f):

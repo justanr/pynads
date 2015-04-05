@@ -1,5 +1,6 @@
-"""These are functions that expect, or interact with: Monoids, Functors,
-Applicatives and Monads.
+"""These are functions that don't expect interact with: Monoids, Functors,
+Applicatives and Monads. Rather they act on just plain values. These
+functions are exported by pynads under the `pynads.funcs` namespace.
 """
 
 from ..utils import _get_name, _get_names, wraps
@@ -8,7 +9,7 @@ from ..utils import _get_name, _get_names, wraps
 __all__ = ('const', 'identity', 'compose')
 
 
-def const(f):
+def const(value):
     """Returns a function that accepts any arguments but only returns a
     predetermined constant.
     >>> def inc(x): x+1
@@ -18,12 +19,12 @@ def const(f):
 
     See: pynads.concrete.reader.Reader for application.
     """
-    @wraps(f)
-    def constant(*a, **k):
-        return f
+    @wraps(value)
+    def constant(*_, **__):
+        return value
 
     # extract *actual* name in case of partial or object
-    constant.__name__ = _get_name(f)
+    constant.__name__ = _get_name(value)
     return constant
 
 
@@ -62,7 +63,6 @@ def compose(*fs):
     It's also possible to pass partialed callables and callable objects into
     compose as well and it will extract the proper names
     """
-
     if not fs:
         return identity
     elif len(fs) == 1:

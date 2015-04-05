@@ -1,4 +1,5 @@
-from pynads import Monad, multibind
+from pynads import Monad
+from pynads.funcs import multibind
 
 class MyMonad(Monad):
     @classmethod

@@ -1,5 +1,6 @@
 import pytest
-from pynads import fmap, multiapply, unit, Applicative
+from pynads import Applicative
+from pynads.funcs import fmap, multiapply, unit
 
 
 class MyApplicative(Applicative):

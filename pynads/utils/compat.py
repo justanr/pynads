@@ -1,7 +1,24 @@
+import sys
 from functools import WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES, partial
 
 
-__all__ = ('update_wrapper', 'wraps')
+PY3 = sys.version_info[0] > 2
+
+__all__ = ('update_wrapper', 'wraps', 'reduce', 'filter', 'filterfalse',
+           'map', 'range', 'zip')
+
+if PY3:
+    map = map
+    range = range
+    zip = zip
+    filter = filter
+    from functools import reduce
+    from itertools import filterfalse
+else:
+    range = xrange
+    reduce = reduce
+    from itertools import (imap as map, ifilter as filter,
+                           izip as zip, ifilterfalse as filterfalse) 
 
 
 # backport Python 3.4's update_wrapper to avoid silliness
