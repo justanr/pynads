@@ -1,4 +1,3 @@
-from collections import namedtuple
 from ..funcs import fmap
 from ..abc import Monad, Container
 from ..utils import _propagate_self
@@ -83,7 +82,7 @@ class Maybe(Monad):
        def inc(x): return Just(x+1)
        def sqr(x): return Just(x*x)
 
-       y = (bad_get_int & Maybe) >> sqr >> inc
+       y = Maybe(bad_get_int()) >> sqr >> inc
 
     If `bad_get_int` returns None, Maybe, by default, translates None into
     Nothing (which is implemented as a Singleton, sorry). Nothing propagates
@@ -100,6 +99,8 @@ class Maybe(Monad):
 
     def __bool__(self):
         return isinstance(self, Just)
+
+    __nonzero__ = __bool__
 
     @staticmethod
     def unit(v):

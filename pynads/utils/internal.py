@@ -1,5 +1,8 @@
-from collections.abc import Iterable, Mapping
-from functools import wraps, partial
+"""A collection of utilities used internally by pynads. By no means are they
+off limits for playing with, however, they aren't exported by pynads.
+"""
+
+from collections import Iterable, Mapping
 from inspect import isfunction
 
 
@@ -8,12 +11,13 @@ __all__ = ('_iter_but_not_str_or_map', '_propagate_self',
            '_get_name', 'iscallable', 'chain_dict_update')
 
 
-def _iter_but_not_str_or_map(x):
+def _iter_but_not_str_or_map(maybe_iter):
     """Helper function to differ between iterables and iterables that are
     strings or mappings. This is used for pynads.concrete.List to determine
     if an iterable should be consumed or placed into a single value tuple.
     """
-    return isinstance(x, Iterable) and not isinstance(x, (str, Mapping))
+    return isinstance(maybe_iter, Iterable) and \
+           not isinstance(maybe_iter, (str, Mapping))
 
 
 def _propagate_self(self, *_, **__):
@@ -44,44 +48,44 @@ def with_metaclass(meta, *bases):
     return meta(name, bases, {})
 
 
-def iscallable(f):
+def iscallable(func):
     """Helper function to determine if a passed object is callable.
     Some versions of Python 3 (3.0 and 3.1) don't have the callable builtin.
 
     Returns True if the passed object appears callable (has the __call__ method
     defined). However, calling the object may still fail.
     """
-    return hasattr(f, '__call__')
+    return hasattr(func, '__call__')
 
 
-def _get_name(f):
+def _get_name(obj):
     """Attempts to extract name from a given callable.
     """
     # interop with functools.partial and objects that emulate it
-    if hasattr(f, 'func') and hasattr(f.func, '__name__'):
-        return "partialed {!s}".format(f.func.__name__)
+    if hasattr(obj, 'func') and hasattr(obj.func, '__name__'):
+        return "partialed {!s}".format(obj.func.__name__)
     # callable object that isn't a function
-    elif not isfunction(f) and hasattr(f, '__class__'):
-        return f.__class__.__name__
+    elif not isfunction(obj) and hasattr(obj, '__class__'):
+        return obj.__class__.__name__
     # must be just a regular function
     else:
-        return f.__name__
+        return obj.__name__
 
 
-def _get_names(*fs):
+def _get_names(*objs):
     """Helper function for pynads.funcs.compose that intelligently extracts
     names from the passed callables, including already composed functions,
     partially applied functions (functools.partial or similar) and callable
     objects.
     """
     names = []
-    for f in fs:
+    for obj in objs:
         # extract names from a previously
         # composed group of functions
-        if hasattr(f, 'fs'):
-            names.extend(_get_names(*f.fs))
+        if hasattr(obj, 'fs'):
+            names.extend(_get_names(*obj.fs))
         else:
-            names.append(_get_name(f))
+            names.append(_get_name(obj))
     return names
 
 

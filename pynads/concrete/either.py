@@ -90,6 +90,8 @@ class Either(Monad):
     def __bool__(self):
         return isinstance(self, Right)
 
+    __nonzero__ = __bool__
+
     @staticmethod
     def unit(v):
         return Right(v)

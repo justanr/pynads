@@ -79,7 +79,7 @@ class Map(Applicative, Monoid, Mapping):
 
         This can be useful for filter with the pynads.funcs.identity function.
         """
-        keys = self.keys() & other.keys()
+        keys = set(self.keys()) & set(other.keys())
         staging = {k: self[k](other[k]) for k in keys}
         return self.__class__(staging)
 

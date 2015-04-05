@@ -1,5 +1,8 @@
-from functools import wraps
-from ..utils import _get_name, _get_names
+"""These are functions that expect, or interact with: Monoids, Functors,
+Applicatives and Monads.
+"""
+
+from ..utils import _get_name, _get_names, wraps
 
 
 __all__ = ('const', 'identity', 'compose')
@@ -15,12 +18,6 @@ def const(f):
 
     See: pynads.concrete.reader.Reader for application.
     """
-    # Note: Python 2 will raise errors if provided with a type that
-    # doesn't have __name__, __module__ or __doc__
-    # major issue with ``functools.partial`` which *is* a valid input
-    # but doesn't define __name__ or __module__.
-    # Fixes: backport Python 3.4's update_wrapper in utils?
-    # or just include toolshed (and ergo toolz) as a requirement?
     @wraps(f)
     def constant(*a, **k):
         return f
