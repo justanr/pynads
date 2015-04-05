@@ -82,7 +82,7 @@ def test_List_handles_gen():
 
 
 def test_List_repr():
-    assert repr(List(1,2,3)) == "List(1,2,3)"
+    assert repr(List(1,2,3)) == "List(1, 2, 3)"
     assert "...5 more..." in repr(List(*range(15)))
 
 
