@@ -1,11 +1,13 @@
-from functools import update_wrapper
+"""Reader is a monadic wrapper around a function.
+"""
+
 from ..abc import Monad, Container
 from ..utils import iscallable, _get_name, _get_names
 from ..funcs import const, compose, identity
 
 
 class Reader(Monad):
-    """Monadic wrapper around a function. Compare to a Haskell implementation
+    r"""Monadic wrapper around a function. Compare to a Haskell implementation
     (where R is short for Reader):
 
         ..code-block: Haskell
@@ -69,21 +71,20 @@ class Reader(Monad):
     >>> from operator import itemgetter
     >>> list_build = lambda x: lambda y: lambda z: [x,y,z]
     >>> # pynads provides a shortcut with R
-    >>> r = list_build & R
     >>> a,b,c = R(itemgetter('a')), R(itemgetter('b')), R(itemgetter('c'))
     >>> env = {'a':10, 'b':7, 'c':9}
-    >>> t = r * a * b * c
+    >>> t = list_build % a * b * c
     >>> t(env)
     ... [10,7,9]
     """
 
-    def __new__(self, v):
+    def __new__(cls, v):
         if not iscallable(v):
             raise TypeError("expected callable type to be passed")
-        return Container.__new__(self)
+        return Container.__new__(cls)
 
     def __call__(self, env):
-        """In Haskell, Reader is defined like this:
+        r"""In Haskell, Reader is defined like this:
 
             ..code-block: Haskell
             newtype Reader e a = Reader { runReader :: e-> a}
@@ -105,11 +106,11 @@ class Reader(Monad):
         return self.v(env)
 
     def __repr__(self):
-        return "Reader({!s})".format(_get_name(self.v))
+        return "{}({!s})".format(self.__class__.__name__, _get_name(self.v))
 
     @classmethod
     def unit(cls, v):
-        """Compare to Haskell's implementation of `pure`/`return` for Reader:
+        r"""Compare to Haskell's implementation of `pure`/`return` for Reader:
 
             ..code-block: Haskell
             instance Applicative (Reader e) where
@@ -125,8 +126,8 @@ class Reader(Monad):
         """
         return cls(const(v))
 
-    def fmap(self, f):
-        """Compare to Haskell's impelementation of fmap for Reader and (->)
+    def fmap(self, func):
+        r"""Compare to Haskell's impelementation of fmap for Reader and (->)
 
             ..code-block: Haskell
             instance Functor ((->) r) where
@@ -144,11 +145,10 @@ class Reader(Monad):
         >>> f(1)
         ... 3
         """
-        c = compose(f, self)
-        return self.__class__(lambda e: c(e))
+        return self.__class__(compose(func, self))
 
     def apply(self, applicative):
-        """Compare to Haskell's applicative instance of Reader and (->)
+        r"""Compare to Haskell's applicative instance of Reader and (->)
 
             ..code-block: Haskell
             instance Applicative ((->) r) where
@@ -165,21 +165,23 @@ class Reader(Monad):
             (+) <$> (+3) <*> (*100) $ 5
             -- 508
 
-            let f = \_ -> (+)
+            let f = (+)
             let g = (+3)
             let h = (*100)
 
-            -- <*> composition of f and g
-            let i = \y -> (f y) (g y)
-            -- actually: \y -> ((\_ -> (+)) y) ((+3) y)
-            -- actually: \y -> (+) ((+3) y)
+            -- f <$> g means fmap f g means f.g
+            let i = (+) . (+3)
 
             -- <*> composition of i and h
-            let j = \z -> (i z) (h z)
-            -- actually: \z -> ((\y -> (+) ((+3) y)) z) (h z)
-            -- actually: \z -> ((+) ((+3) z)) ((*100) z)
-            -- j 5
-            -- 508
+            let j = \e -> (i z) (h z)
+            --      \e -> (((+) . (+3)) e) ((*100) e)
+
+            -- feeding 5 through j ends up looking like this:
+            -- j 5 = (((+) . (+3)) 5) ((*100) 5)
+            -- j 5 = ((+) (5+3)) (5*100)
+            -- j 5 = (+) 8 500
+            -- j 5 = 8 + 500
+            -- j 5 = 508
 
         Similarly, the Reader version of it resembles:
 
@@ -188,20 +190,22 @@ class Reader(Monad):
             runR r 5
             -- 508
 
-            let rf = R $ \_ -> (+)
+            let rf = (+)
             let rg = R (+3)
             let rh = R (*100)
 
-            -- <*> composition of rf and rg
-            let ri = R $ \y -> let (R f) = rf
-                                   (R g) = rg
-                               in (f y) (g y)
+            -- (+) <$> R (+3) means fmap (+) (R (+3))
+            let ri = R (\e -> (+) . (+3) e)
 
-            -- <*> composition of ri and rh
-            let rj = R $ \z -> let (R i) = ri
-                                   (R h) = rh
-                               in (i z) (h z)
+            -- <*> composition of rh and ri
+            let rj = R (\e -> (ri e) (rh e))
+            -- Expand out what (ri e) and (rh e) really mean...
+            --     = R (\e -> ((\f -> ((+) . (+3)) f) e) ((*100) e))
+            -- Now simplify it by simulating feeding e into these functions
+            --     = R (\e -> ((+) . (+3) e) ((*100) e))
+            --     = R (\e -> (+) (e+3) (e*100)
 
+            -- Run the whole thing!
             runR rj 5
             -- 508
 
@@ -211,15 +215,14 @@ class Reader(Monad):
         >>> add = lambda x: lambda y: x+y
         >>> inc_3 = lambda x: x+3
         >>> mul_100 = lambda x: x*100
-        >>> s = (add & Reader) * Reader(inc_three) * Reader(mul_100)
+        >>> s = add % Reader(inc_three) * Reader(mul_100)
         >>> s(5) # compare: runR s 5
         ... 508
 
         Similarly, we can pull information from a dictionary as well:
 
-        >>> from operator import itemgetter
-        >>> r = (add & Rader)
-        >>> t = r >> Reader(itemgetter('a')) >> Reader(itemgetter('b')
+        >>> from operator import itemgetter as read
+        >>> t = add % Reader(read('a')) * Reader(read('b'))
         >>> t({'a':10, 'b':7})
         ... 17
         """
@@ -228,7 +231,7 @@ class Reader(Monad):
         #     (R g) = rg
         # in R $ \y -> (f y) (g y)
         def applied(env, f=self, g=applicative):
-            """First supply the environment to this Reader to get a function
+            r"""First supply the environment to this Reader to get a function
             back. And then call the returned function with the result of
             the function stored in the next applicative when provided with
             the same environment.
@@ -243,7 +246,7 @@ class Reader(Monad):
         return self.__class__(applied)
 
     def bind(self, g):
-        """Compare to Haskell's implemention of Monad for Reader:
+        r"""Compare to Haskell's implemention of Monad for Reader:
 
             ..code-block: Haskell
             instance Monad (R e) where
@@ -288,14 +291,15 @@ class Reader(Monad):
         Example taken from:
         <http://www.dustingetz.com/2012/10/02/reader-writer-state-monad-in-python.html>
 
-        >>> computation = R(itemgetter('a')) >> (lambda a:
-        ...               R(itemgetter('b')) >> (lambda b:
-        ...               (a+b) & R                     ))
+        >>> from operator import itemgetter as read
+        >>> computation = R(read('a')) >> (lambda a:
+        ...               R(read('b')) >> (lambda b:
+        ...               R.unit(a+b)             ))
         >>> computation({'a':10, 'b': 7})
         ... 17
         """
         def bound(env, f=self, g=g):
-            """First run the function stored in this instance with the
+            r"""First run the function stored in this instance with the
             provided environment to get a result `a`. Feed that result to
             the function being bound to get a Reader instance. Finally,
             call the returned reader with the environment to get a result.
@@ -319,19 +323,3 @@ class Reader(Monad):
 # it makes sense to alias it to Function as well
 # though, it will still represent as Reader when introspected
 Function = Reader
-
-
-# emulate Haskell's ask and local Reader helpers
-def ask():
-    """Returns the current environment in a Reader's computation.
-    """
-    return Reader(identity)
-
-
-def local(changer):
-    """Manipulates the current environment by executing a function over it.
-    """
-    def env_changer(env):
-        new_env = changer(env)
-        return new_env
-    return Reader(update_wrapper(env_changer, local))

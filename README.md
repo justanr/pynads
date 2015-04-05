@@ -34,33 +34,32 @@ Or use a functional approach:
 unit(4, Maybe)
 ```
 
-Or emulate Haskell poorly:
-
-```python
-4 & Maybe
-```
-
 Unit on other Monads:
 
 ```python
-4 & Either # outputs Right(4)
-4 & List   # outputs List(4)
-4 & Writer # outputs Writer(4, List())
-('a', 4) & Map    # outputs Map({4: None})
-4 & Reader # outputs Reader(const(4))
+Either.unit(4)     # Right 4
+List.unit(4)       # List 4
+Writer.unit(4)     # Writer 4 List()
+Map.unit(('a', 4)) # Map({'a': 4})
+Reader.unit(4)     # Reader(const)
 ```
 
 The `List` monad is also smart enough to differ between strings and mappings
 and other types of iterables:
 
 ```python
-"hello" & List  # List("hello")
-{'a': 4} & List # List({'a': 4})
-[4, 5] & List   # List(4, 5)
+List.unit("hello")   # List("hello")
+List.unit({'a': 4})  # List({'a': 4})
+List.unit([4, 5])    # List(4, 5)
 ```
 
 `Reader`'s unit method puts a value into a closure that ignores any input
 and returns the original value.
+
+```Python
+r = Reader.unit(4)
+print(r(None)) # boom, 4 pops out!
+```
 
 ###Bind, Shove, `>>=`, et. al
 
@@ -73,14 +72,25 @@ Just(4) >> (lambda v: Maybe(v+2))
 Chain them together with excessive parens:
 
 ```python
-Maybe.unit(4) >> (lambda v: Maybe(v+2)) >> (lambda v: Nothing)
+Maybe.unit(4) >> (lambda v: v+2) >> (lambda v: Nothing)
 ```
 
-Here's this thing:
+Tired of guarding against Nones?
 
 ```python
-(2 & Just) >> (lambda x: Just(x+2))
+from random import randint
+
+def bad_get_int():
+    x = randint(1,10)
+    return x if x%2 else None
+
+inc = lambda x: x+1
+
+Maybe(bad_get_int()) >> inc >> inc
 ```
+
+Now you can focus *what* your fail condition is, rather than how to handle it!
+
 
 Use the bind assignment operator:
 ```python
@@ -96,7 +106,7 @@ lambdas is necessary, formatted for readability:
 >>> from pynads import R # use Reader shortcut
 >>> comp = R(read('a')) >> (lambda a:
            R(read('b')) >> (lambda b:
-           (a+b) & R              ))
+           R.unit(a+b)             ))
 >>> comp({'a': 10, 'b': 7})
 ... 17
 ```
@@ -132,6 +142,16 @@ fmd.fmap(lambda x: x+1)
 fmap(lambda x: x+1, fmd)
 ```
 
+I lied, there's three! In Haskell there's `<$>` that serves as an infix fmap.
+Of course it'll make an appearance here, too!
+
+```python
+(lambda x: x+1) % fmd
+```
+
+`%` was chosen because if you squint really hard, ignore the angle brackets,
+then `%` and `<$>` kinda look similar.
+
 ###Applicatives
 We got applicatives as well!
 
@@ -145,10 +165,18 @@ But wait, there's an operator!
 Just(lambda x: x+2) * Just(2)
 ```
 
-*Just* like before, take operator overloading abuse to 11!
+*Just* like before, take operator overloading to 11!
 
 ```python
-((lambda x: x+2) & Just) * Just(2)
+from random import randint
+
+def bad_get_int():
+    x = randint(1,10)
+    return x if x%2 else None
+
+add_two = lambda x: lambda y: x+y
+
+t = add_two % bad_get_int() * bad_get_int()
 ```
 
 Got a curried function (or just a bunch of nested single argument lambdas)?!

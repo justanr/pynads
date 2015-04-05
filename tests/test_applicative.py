@@ -26,20 +26,20 @@ def test_class_unit():
     assert a.v is id and isinstance(a, Applicative)
 
 
-def test_unit_shortcut():
-    assert (2 & MyApplicative) == MyApplicative.unit(2)
-
-
-def test_myapplicative_instance_doesnt_have_rand():
-    assert not hasattr(MyApplicative(None), '__rand__')
-
-
 def test_apply():
     a = MyApplicative.unit(id)
     b = MyApplicative.unit('b')
     c = a.apply(b)
 
     assert c == b
+
+
+def test_fmap_infix_to_chain_apply():
+    a = MyApplicative('a')
+    b = MyApplicative('b')
+    ab = fake_curry % a * b
+
+    assert ab == MyApplicative('ab')
 
 
 def test_mul_apply():
@@ -53,7 +53,7 @@ def test_chain_apply():
     a = MyApplicative.unit(fake_curry)
     b = MyApplicative.unit(2)
 
-    c = a * b *b
+    c = a * b * b
 
     assert c == MyApplicative.unit(4)
 

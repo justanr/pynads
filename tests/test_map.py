@@ -84,7 +84,7 @@ def test_Map_apply_multiple_args_with_miss():
     q = m * n * o * p
     assert q.v == {}
 
-# test required collections.abc.Mapping methods as well as nicety methods
+# test required collections.Mapping methods as well as nicety methods
 def test_Map_len():
     assert len(Map({'a':1})) == 1
 

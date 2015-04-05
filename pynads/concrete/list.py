@@ -1,4 +1,4 @@
-from collections.abc import Sequence, Iterable
+from collections import Sequence
 from itertools import chain
 from ..abc import Monad, Monoid
 from ..funcs import fmap
@@ -17,22 +17,22 @@ class List(Monad, Monoid, Sequence):
     ...     "Calc pos and neg roots"
     ...     v = x**(.5)
     ...     return (-v, v)
-    >>> ([1,4,9] & List) >> sqrt
-    ... List [-1.0,1.0,-2.0,2.0,-3.0,3.0]
+    >>> List(1, 4, 9) >> sqrt
+    ... List(-1.0, 1.0, -2.0, 2.0, -3.0, 3.0)
 
     They can also be used for transforming non-deterministic results:
 
-    >>> l = [1,2,3] & List
+    >>> l = List.unit([1,2,3])
     >>> fmap(lambda x: x+2, l)
-    ... List [3,4,5]
+    ... List(3, 4, 5)
 
     As well as applying multiple functions to arguments:
 
     >>> add_two = lambda x: x+2
     >>> mul_two = lambda x: x*2
-    >>> fs = [add_two, mul_two] & List
-    >>> fs * ([1,4,9] & List)
-    ... List(2,8,18,3,6,11)
+    >>> fs = List(add_two, mul_two)
+    >>> fs * List(1, 4, 9)
+    ... List(3, 6, 11, 2, 8, 18)
 
     Despite the name, this Monad is closer to Python's ``tuple`` than ``list``
     this is because Haskell's lists are immutable. List doesn't support
@@ -43,11 +43,11 @@ class List(Monad, Monoid, Sequence):
     context. However, when it receives any other iterable, it consumes that
     value and puts them all into context:
 
-    >>> "fred" & List
+    >>> List.unit("fred")
     ... List("fred")
-    >>> [1,2,3] & List
-    ... List(1,2,3)
-    >>> {1:'a', 2:'b'} & List
+    >>> List.unit([1,2,3])
+    ... List(1, 2, 3)
+    >>> List.unit({1:'a', 2:'b'})
     ... List({1:'a', 2:'b'})
 
     Usually type checking is frowned upon in Python -- and rightfully so --
@@ -55,17 +55,17 @@ class List(Monad, Monoid, Sequence):
     checks against abstract base classes (except for the case of string
     where the actual `str` class is checked against) and ``isinstance``.
     Any data structure that defines an `__iter__` method but doesn't inherit
-    from the `collections.abc.Mapping` or `str` classes will be consumed.
+    from the `collections.Mapping` or `str` classes will be consumed.
 
     Unlike Haskell, this process is *eager* so passing an infinite sequence
     will just cause it to compute forever, probably blowing memory out of the
     water as well.
 
     List is also monoidal. It's mempty unit is an empty tuple and mappend
-    is simply tuple addition. List provides its own mconcat method which
-    uses itertools.chain to create a single consumable iterator rather than
-    creating many List instances in between the beginning and final results
-    similar to ``str.join`` vs ``str1 + str2 + str3 + ...``.
+    actually just uses itertools.chain. List provides its own mconcat method
+    which uses itertools.chain to create a single consumable iterator rather
+    than creating many List instances in between the beginning and final
+    results similar to ``str.join`` vs ``str1 + str2 + str3 + ...``.
     """
     __slots__ = ()
     mempty = ()
@@ -84,10 +84,10 @@ class List(Monad, Monoid, Sequence):
             head = self.v[:5]
             middle = '...{!s} more...'.format(len(self) - 10)
             tail = self.v[-5:]
-            body = ','.join([str(i) for i in chain(head, [middle], tail)])
+            body = ', '.join([repr(i) for i in chain(head, [middle], tail)])
 
         else:
-            body = ','.join([str(v) for v in self.v])
+            body = ', '.join([repr(v) for v in self.v])
 
         return main.format(self.__class__.__name__, body)
 
@@ -129,7 +129,7 @@ class List(Monad, Monoid, Sequence):
         mconcat uses itertools.chain to create a single iterator out of many
         and feeds that to List.unit.
         """
-        return cls.unit(chain(*monoids))
+        return cls.unit(chain.from_iterable(monoids))
 
     # here be boring stuff...
     def __hash__(self):
@@ -172,7 +172,7 @@ class List(Monad, Monoid, Sequence):
 
     def __getitem__(self, idx):
         if isinstance(idx, slice):
-            return self.v[idx] & List
+            return self.unit(self.v[idx])
         return self.v[idx]
 
     def __len__(self):

@@ -38,7 +38,7 @@ def test_Reader_call():
 
 
 def test_Reader_unit():
-    r = inc & R
+    r = R.unit(inc)
     assert r(None) is inc
     assert r(None)(1) == 2
 
@@ -56,7 +56,7 @@ def test_Reader_fmap():
 
 def test_Reader_apply():
     env = {'a':10, 'b': 7}
-    r = add_two & R
+    r = R.unit(add_two)
     s = r * R(inc3) * R(mul100)
     a = R(itemgetter('a'))
     b = R(itemgetter('b'))
@@ -66,7 +66,7 @@ def test_Reader_apply():
 
 
 def test_Reader_apply_meta():
-    r = add_two & R
+    r = R.unit(add_two)
     s = r * R(inc3)
     t = s * R(mul100)
 
@@ -87,7 +87,7 @@ def test_Reader_bind():
 def test_Reader_pull_from_env():
     c = R(itemgetter('a')) >> (lambda a:
         R(itemgetter('b')) >> (lambda b:
-        (a+b) & R                     ))
+        R.unit(a+b)                   ))
     
     assert c({'a':10, 'b':7}) == 17
     assert c({'a': [1], 'b': [2]}) == [1,2]
