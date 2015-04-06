@@ -44,7 +44,9 @@ class _Mempty(Monoid):
         will also filter all instances of mempty out instead of relying
         on the _Mempty._reflected_mappend method.
         """
-        monoids = filter(lambda x: not isinstance(x, _Mempty), monoids)
+        monoids = list(filter(lambda x: not isinstance(x, _Mempty), monoids))
+        if not monoids:
+            return _Mempty()
         return mconcat(*monoids, **kwargs)
 
     def _reflected_mappend(self, other):

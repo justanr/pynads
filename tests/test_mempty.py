@@ -29,6 +29,11 @@ def test_Mempty_mappend(monoid):
 def test_Mempty_mconcat(monoids, result):
     assert Mempty.mconcat(*monoids) == result
 
+
+def test_Mempty_mconcat_with_all_mempties():
+    assert Mempty.mconcat(Mempty, Mempty) is Mempty
+
+
 @pytest.mark.parametrize('monoid', [
     [List(1,2,3)], [{1,2}], [3], [True]
 ])
