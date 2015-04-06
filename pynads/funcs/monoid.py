@@ -4,7 +4,7 @@
 
 from ..utils.compat import reduce
 from ..utils.monoidal import (get_generic_mappend, get_generic_mempty, 
-                              generic_mconcat)
+                              generic_mconcat, is_monoid)
 
 __all__ = ('mempty', 'mappend', 'mconcat')
 

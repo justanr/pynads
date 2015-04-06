@@ -2,20 +2,26 @@ from collections import Sequence, Mapping, Set
 from decimal import Decimal
 from numbers import Number
 from operator import add, or_
-import pytest
+from pynads import List, Map
 from pynads.utils import monoidal as m, chain_dict_update
-
+import pytest
+from weakref import WeakSet
 
 ints = (1,2,3)
 
-list_of = lambda maker, stuff: [maker(x) for x in stuff] 
+list_of = lambda maker, stuff: [maker(x) for x in stuff]
+
+class DummyMonoid(object):
+    mempty = None
+    mconcat = mappend = lambda s: s
 
 @pytest.mark.parametrize('obj, type', [
     (Decimal('0'), Number),
     (set(), Set),
     (dict(), Mapping),
     (list(), Sequence),
-    (str(), str)
+    (str(), str),
+    pytest.mark.xfail((WeakSet(), Set)) #surprise!
 ])
 def test_get_generic_type(obj, type):
     assert m._get_generic_type(obj) is type
@@ -71,3 +77,12 @@ def test_get_generic_mempty_raises_with_unknown():
 def test_generic_mconcat(objs, expected):
     mappend = m.get_generic_mappend(objs[0])
     assert m.generic_mconcat(mappend, *objs) == expected
+
+
+@pytest.mark.parametrize('obj, is_monoidal', [
+    (Decimal(1), False), (List(), True),
+    (1, True), ([], True), (object(), False),
+    (Map(), True), (DummyMonoid(), True)
+])
+def test_is_monoid(obj, is_monoidal):
+    assert m.is_monoid(obj) == is_monoidal

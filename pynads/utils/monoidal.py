@@ -9,6 +9,7 @@ from numbers import Number
 from operator import add, or_
 from .compat import filter, reduce
 from .internal import chain_dict_update
+from ..abc.monoid import Monoid
 
 _builtin_types = (float, int, str, list, tuple, set, frozenset, dict)
 _generic_types = (Number, str, Sequence, Mapping, Set)
@@ -47,6 +48,39 @@ _builtin_to_generic = {
     set: Set,
     frozenset: Set
 }
+
+_monoidal_attrs = ('mempty', 'mappend', 'mconcat')
+
+
+def is_monoid(obj, 
+              monoid_attrs=_monoidal_attrs,
+              generics=_generic_types, 
+              known_to_generics=_builtin_to_generic,
+              known_mempties=_builtin_mempties,
+              known_mappends=_generic_mappends):
+    """Attempts to determine if an object is a monoid or not. When in doubt,
+    this function returns false. For example, even though get_generic_mappend
+    can derive a generic mappend for decimal.Decimal (it is, after all,
+    a "subclass" of numbers.Number), there's not a hardcoded mempty for it
+    despite that it would be ``decimal.Decimal(0)`` and is_monoid would
+    return false against it.
+
+    Despite this, it is possible to override the default settings to provide
+    for other object types that are monoidal.
+    """
+    if isinstance(obj, Monoid) or all(hasattr(obj, x) for x in monoid_attrs):
+        return True
+    else:
+        try:
+            get_generic_mempty(obj, known_mempties=known_mempties)
+            get_generic_mappend(obj, 
+                                generics=generics,
+                                known_to_generics=known_to_generics,
+                                known_mappends=known_mappends)
+        except TypeError:
+            return False
+        else:
+            return True
 
 
 def _get_generic_type(obj, generics=_generic_types, 
