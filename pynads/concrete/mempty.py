@@ -27,7 +27,7 @@ class _Mempty(Monoid):
         return cls.__inst
 
     def __repr__(self):
-        return 'mempty'
+        return 'Mempty'
 
     def mappend(self, other):
         """When mempty is used to mappend something, it simply becomes
