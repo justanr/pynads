@@ -46,7 +46,7 @@ class _Mempty(Monoid):
         """
         monoids = list(filter(lambda x: not isinstance(x, _Mempty), monoids))
         if not monoids:
-            return _Mempty()
+            return Mempty
         return mconcat(*monoids, **kwargs)
 
     def _reflected_mappend(self, other):
