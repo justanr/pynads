@@ -34,7 +34,7 @@ class _Mempty(Monoid):
         the other value if it is monoidal. Otherwise, a TypeError is raised.
         In doing so, the transient mempty disappears.
         """
-        return self._reflected_mappend(other)
+        return other
 
     @staticmethod
     def mconcat(*monoids, **kwargs):
