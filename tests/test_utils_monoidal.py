@@ -21,6 +21,7 @@ class DummyMonoid(object):
     (dict(), Mapping),
     (list(), Sequence),
     (str(), str),
+    (bool(), bool),
     pytest.mark.xfail((WeakSet(), Set)) #surprise!
 ])
 def test_get_generic_type(obj, type):
@@ -29,7 +30,8 @@ def test_get_generic_type(obj, type):
 
 @pytest.mark.parametrize('generic, mappend', [
     (Sequence, m._seq_mappend), (Set, or_), 
-    (str, add), (Number, add), (Decimal, None)
+    (str, add), (Number, add), (Decimal, None),
+    (WeakSet, None), (bool, or_)
 ])
 # note leading underscore!
 def test__get_generic_mappend_from_generic_type(generic, mappend):
@@ -40,7 +42,7 @@ def test__get_generic_mappend_from_generic_type(generic, mappend):
     ([], m._seq_mappend), ((), m._seq_mappend),
     (6, add), (6.0, add), (6+1j, add), ({4}, or_),
     (frozenset([2]), or_), ({1:1}, chain_dict_update),
-    (Decimal('6'), add)
+    (Decimal('6'), add), (True, or_)
 ])
 # note no leading underscore!
 def test_get_generic_mappend_from_obj(obj, mappend):
@@ -50,7 +52,8 @@ def test_get_generic_mappend_from_obj(obj, mappend):
 @pytest.mark.parametrize('obj, mempty', [
     (6.0, 0.0), (1, 0), (6+1j, 0j), ('hello', ''),
     ([1,2,3], []), ((1,2,3), ()), ({4}, set()),
-    (frozenset([1,2,3]), frozenset()), ({1:1}, {})
+    (frozenset([1,2,3]), frozenset()), ({1:1}, {}),
+    (True, False)
 ])
 def test_get_generic_mempty(obj, mempty):
     assert m.get_generic_mempty(obj) == mempty
@@ -72,17 +75,19 @@ def test_get_generic_mempty_raises_with_unknown():
     (list_of(lambda a: [a], ints), list(ints)),
     (list_of(str, ints), '123'),
     (list_of(lambda a: {a:a}, ints), {1:1, 2:2, 3:3}),
-    (list_of(lambda a: (a,), ints), list(ints))
+    (list_of(lambda a: (a,), ints), list(ints)),
+    ([True, False, True], True),
+    ([False, False, False], False)
 ])
 def test_generic_mconcat(objs, expected):
-    mappend = m.get_generic_mappend(objs[0])
-    assert m.generic_mconcat(mappend, *objs) == expected
+    assert m.generic_mconcat(*objs) == expected
 
 
 @pytest.mark.parametrize('obj, is_monoidal', [
     (Decimal(1), False), (List(), True),
     (1, True), ([], True), (object(), False),
-    (Map(), True), (DummyMonoid(), True)
+    (Map(), True), (DummyMonoid(), True),
+    (True, True)
 ])
 def test_is_monoid(obj, is_monoidal):
     assert m.is_monoid(obj) == is_monoidal
