@@ -29,17 +29,12 @@ class _Mempty(Monoid):
     def __repr__(self):
         return 'mempty'
 
-    def mappend(_, other):
+    def mappend(self, other):
         """When mempty is used to mappend something, it simply becomes
         the other value if it is monoidal. Otherwise, a TypeError is raised.
         In doing so, the transient mempty disappears.
         """
-        if is_monoid(other):
-            return other
-        else:
-            raise TypeError("Non-monoidal value ({!r} instance of {!s})"
-                            "mappended to transient mempty."
-                            "".format(other, type(other)))
+        return self._reflected_mappend(other)
 
     @staticmethod
     def mconcat(*monoids, **kwargs):
