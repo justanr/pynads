@@ -29,6 +29,11 @@ from .compat import filter, reduce
 from .internal import chain_dict_update
 from ..abc.monoid import Monoid
 
+
+__all__ = ('get_generic_mempty', 'get_generic_mappend',
+           'generic_mconcat', 'is_monoid')
+
+
 _builtin_types = (float, int, str, list, tuple, set, frozenset, dict, bool)
 # bool before Number because booleans are numbers but a special case
 # str before Sequence because strings are sequences but a special case
