@@ -59,29 +59,6 @@ class Writer(Monad):
     Of course, Writer monad isn't really building some state to pass around,
     that's the job of another monad. Rather, it's about keep tracking of the
     status of something as it passes through transformations.
-
-    For your consideration, here's FizzBuzz with this implementation of
-    Writer...
-
-    >>> from pynads import Writer
-    >>> from pynads.funcs import multibind
-    >>> from itertools import repeat
-    >>> pairs = ((5, 'fizz'), (3, 'buzz'))
-    >>> def fizzer(n, pairs=pairs):
-    ...     fizzed = []
-    ...     for num, buzzed in pairs:
-    ...         if not n%num:
-    ...             fizzed.append(buzzed)
-    ...     if not fizzed:
-    ...         fizzed = n
-    ...     else:
-    ...         fizzed = ''.join(fizzed)
-    ...     return Writer(n+1, {n:fizzed})
-    ...
-    >>> multibind(Writer(1, {}), *repeat(fizzer, 15))
-    ... Writer(16, {1:1, 2:2, 3:'buzz', 4:4, 5:'fizz', 6:'buzz', 7:7, 8:8,
-    ...             9:'buzz', 10:'fizz', 11:11, 12:'buzz', 13:13, 14:14
-    ...             15:'fizzbuzz'})
     """
     __slots__ = ('_log',)
 
