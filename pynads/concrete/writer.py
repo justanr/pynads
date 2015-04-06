@@ -29,11 +29,11 @@ class Writer(Monad):
     from the function it binds to, it creates a third Writer which has the
     value from the second Writer and combines the logs from both previous
     Writers into a single cohesive log.
-    
+
     ``pynads`` emulates this behavior, including allowing any monoidal value
     as the log with one cavaet: if the initial log value *isn't* a monoid,
     it's stuffed into a List monad which is. The definition of what is and
-    isn't considered a monoid is determined by 
+    isn't considered a monoid is determined by
     ``pynads.utils.monoidal.is_monoid`` so that's worth checking up on to
     see how to write (heh) binding functions for Writer.
 

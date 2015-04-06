@@ -18,7 +18,7 @@ else:
     range = xrange
     reduce = reduce
     from itertools import (imap as map, ifilter as filter,
-                           izip as zip, ifilterfalse as filterfalse) 
+                           izip as zip, ifilterfalse as filterfalse)
 
 
 # backport Python 3.4's update_wrapper to avoid silliness
@@ -55,6 +55,7 @@ def update_wrapper(wrapper,
 
     # return wrapper so this can be used as a decorator
     return wrapper
+
 
 def wraps(wrapped, assigned=WRAPPER_ASSIGNMENTS, updated=WRAPPER_UPDATES):
     """Decorator form of update_wrapper.

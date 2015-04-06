@@ -15,7 +15,7 @@ class Monad(Applicative):
                 (>>=) :: m a -> (a -> b) -> m b
 
                 (>>) :: m a -> m b -> m b
-                x >> y = x >>= \_ -> y 
+                x >> y = x >>= \_ -> y
 
                 fail :: String -> m a
                 fail msg = error msg
@@ -29,14 +29,14 @@ class Monad(Applicative):
 
     `return` is just Applicative's pure. Because reasons, pure
     and return are different things but do the exact same thing. That leaves
-    `(>>=)` -- also known as bind, shove, push, etc -- which looks scary 
+    `(>>=)` -- also known as bind, shove, push, etc -- which looks scary
     but really isn't.
 
     The type signature of `(>>=)` looks very similar to fmap! Essentially,
     it's fmap in reverse. Instead of taking a function and mapping it over
     a Functor, `(>>=)` takes a monad and places its value into a function.
     The only contract in place is that the final result of a `(>>=)` call
-    is a monad of the same type, e.g `Just 4 >>= \x -> Nothing`. 
+    is a monad of the same type, e.g `Just 4 >>= \x -> Nothing`.
     Just and Nothing are both "members" of the Maybe type.
 
     Like before, Maybe, Either, [] and (->)  will be our guides here:
@@ -68,17 +68,17 @@ class Monad(Applicative):
 
         .. code-block:: Haskell
             isEven x = x `mod` 2 == 0
-            incIfEven = if isEven x then Just (x+1) else Nothing 
+            incIfEven = if isEven x then Just (x+1) else Nothing
             Just 4 >>= incIfEven
             -- Just 5
             Just 5 >>= incIfEven >>= incIfEven
             -- Nothing
-    
+
     It becomes more clear that the failure is simply propagating when Either
     becomes involved:
 
         .. code-block:: Haskell
-            incIfEven = if isEven x then Right (x+1) 
+            incIfEven = if isEven x then Right (x+1)
                         else Left ("Got odd: " ++ show x)
             Right 4 >>= incIfEven
             -- Right 5

@@ -16,8 +16,8 @@ def _iter_but_not_str_or_map(maybe_iter):
     strings or mappings. This is used for pynads.concrete.List to determine
     if an iterable should be consumed or placed into a single value tuple.
     """
-    return isinstance(maybe_iter, Iterable) and \
-           not isinstance(maybe_iter, (str, Mapping))
+    return (isinstance(maybe_iter, Iterable) and
+            not isinstance(maybe_iter, (str, Mapping)))
 
 
 def _propagate_self(self, *_, **__):
