@@ -203,6 +203,30 @@ Subclasses of Monoid are welcome to replace `mconcat` with their own versions.
 
 `pynads` has two monoids: `pynads.List` and `pynads.Map`
 
+But that doesn't stop `pynads` from mappending and mconcatting its way through
+built in types. int, float, complex, set, frozenset, bool, list, str, dict...
+`pynads` don't care, it'll figure out how to handle it. And it doesn't stop
+there, it can determine how to `mappend` a few non-built in types as well
+like `decimal.Decimal` or your class that extends from `collections.Set` --
+though, surprisingly, classes like `weakref.WeakSet` never end up being
+considered an extension of `collections.abc.Set` for some reason. Yes, yes, 
+it uses type checking but it tries its best to do it against  ABCs rather 
+than hard types.
+
+###Mempty
+With monoids comes mempty! And `pynads` has a pretty nifty trick up its
+sleeve when it comes to dealing with mempty. Haskell allows us to use
+mempty as a placeholder value. And so does `pynads` with the special `Mempty`
+singleton (didn't need to be a singleton though, just taking your RAM into
+consideration). `Mempty` just stands around and waits for a real monoid to
+show up. That means if you try to use `mappend` or `mconcat` on it, `Mempty`
+goes, "Here, let me step out of the way...". If you try to `mconcat` with
+all values set to `Mempty`, you get a `Mempty` back ready to step out of the
+way again.
+
+On top of all that, it reminds me Memphis when I type out `Mempty` and just
+makes me yearn for real BBQ.
+
 ##Coming Soon!
 Despite this being a toy implementation of Haskell things in Python, I've
 taken quite a shine to it. Currently, these are the things in the works:
