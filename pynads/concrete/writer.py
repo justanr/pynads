@@ -3,35 +3,115 @@ from ..abc import Monad
 from ..funcs import fmap, mappend
 from ..utils import is_monoid
 from .list import List
+from .mempty import Mempty
 
 
 class Writer(Monad):
-    """Stores a value as well as a log of events that have transpired
-    with the value.
-    """
-    __slots__ = ('log',)
+    """The Writer monad stores both a value and some side output, commonly
+    referred to as a log because its usually used to track transformations
+    on the stored value. However, Haskell and ``pynads`` allows using any
+    monoid as the log value.
 
-    def __init__(self, v, log=None):
+    Since the Functor and Applicative instances aren't that interesting,
+    I'm just going to show the Haskell Monad instance as that's where the
+    real magic happens!
+
+        .. code-block:: Haskell
+            data Writer w a = Writer { runWriter :: (a,w) }
+
+            instance Monad (Writer w) where
+                return x = Writer (x, mempty)
+                (Writer (v, l)) >>= f = let (Writer (v', l')) = f v
+                                        in Writer (v', l `mappend` l')
+
+    The `return` operation just places a value in a Writer with a Mempty as
+    the log value place holder. Bind however, not only expects to get a log
+    from the function it binds to, it creates a third Writer which has the
+    value from the second Writer and combines the logs from both previous
+    Writers into a single cohesive log.
+    
+    ``pynads`` emulates this behavior, including allowing any monoidal value
+    as the log with one cavaet: if the initial log value *isn't* a monoid,
+    it's stuffed into a List monad which is. The definition of what is and
+    isn't considered a monoid is determined by 
+    ``pynads.utils.monoidal.is_monoid`` so that's worth checking up on to
+    see how to write (heh) binding functions for Writer.
+
+    >>> w = Writer.unit(1)
+    >>> w.v, w.log
+    ... (4, Mempty)
+    >>> w <<= lambda x: Writer(x+1, 'added one')
+    >>> w.v, w.log
+    ... (5, 'added one')
+
+    However, Writer can be used for more than simply keeping a log of events.
+    It can be used for keeping track of any secondary output a function
+    that would otherwise become messy and bug prone.
+    """
+    __slots__ = ('_log',)
+
+    def __init__(self, v, log=Mempty):
         super(Writer, self).__init__(v)
 
-        if log is None:
-            log = List()
-        elif not is_monoid(log):
+        if not is_monoid(log):
             log = List.unit(log)
-        self.log = log
+        self._log = log
+
+    @property
+    def log(self):
+        return self._log
 
     @classmethod
     def unit(cls, v):
-        return cls(v, List())
+        """The most minimal context for a value in a Writer is a Writer with
+        that value and a Mempty as the default value for the log.
+        """
+        return cls(v, Mempty)
 
     def fmap(self, f):
+        """Call a function with the stored value as the input. Nothing fancy
+        here.
+        """
         return Writer(f(self.v), self.log)
 
     def apply(self, applicative):
+        """Take a function stored in this Writer and apply it to the next
+        writer in the sequence. Nothing fancy here either.
+        """
         return fmap(self.v, applicative)
 
     def bind(self, f):
-        v, entry = f(self.v)
+        """As explained in the class docstring, bind takes the value stored
+        in an instance of Writer and feeds it to a function that accepts
+        that value and outputs a Writer as well. A new Writer is created
+        which contains the new value and the combined logs of both
+        previous Writers.
+
+        >>> w = Writer.unit(4)
+        >>> f = lambda x: Writer(x//2, ['divided by two'])
+        >>> g = lambda x: Writer(str(x), ['converted to str'])
+        >>> w >> f >> f
+        ... Writer(1, ['divided by two', 'divided by two'])
+        >>> w >> f >> g
+        ... Writer('2', ['divided by two', 'converted to string'])
+
+        The writer monad could also be used to track the values that
+        pass through the transformations, as well...
+
+        >>> w = Writer.unit(4)
+        >>> f = lambda x: Writer(x//2, [x])
+        >>> g = lambda x: Writer(str(x), [x])
+        >>> w >> f >> g
+        ... Writer('2', [4, 2])
+
+        This bind operation will work with any compatible monads. which
+        is either determined by their `mappend` method or by
+        `pynads.utils.monoidal.get_generic_mappend`. Suffice to say,
+        if your log is a boolean and you attempt merge them, you'll get a
+        TypeError.
+        """
+        w = f(self.v)
+        v, entry = w.v, w.log
         return Writer(v, mappend(self.log, entry))
 
     def __repr__(self):
