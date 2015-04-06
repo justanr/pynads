@@ -22,14 +22,17 @@ a specific set of rules.
 
 from collections import Sequence, Mapping, Set
 from itertools import chain
+from functools import partial
 from numbers import Number
 from operator import add, or_
 from .compat import filter, reduce
 from .internal import chain_dict_update
 from ..abc.monoid import Monoid
 
-_builtin_types = (float, int, str, list, tuple, set, frozenset, dict)
-_generic_types = (Number, str, Sequence, Mapping, Set)
+_builtin_types = (float, int, str, list, tuple, set, frozenset, dict, bool)
+# bool before Number because booleans are numbers but a special case
+# str before Sequence because strings are sequences but a special case
+_generic_types = (bool, Number, str, Sequence, Mapping, Set)
 
 _builtin_mempties = {
     float: 0.0,
@@ -40,18 +43,20 @@ _builtin_mempties = {
     tuple: (),
     set: set(),
     frozenset: frozenset(),
-    dict: {}
+    dict: {},
+    bool: False
 }
 
 
-_seq_mappend = lambda a, b: list(chain(a,b))
+_seq_mappend = lambda a, b: list(chain(a, b))
 
-_generic_mappends = {
+_known_mappends = {
     Number: add,
     str: add,
     Sequence: _seq_mappend,
     Mapping: chain_dict_update,
     Set: or_,
+    bool: or_
 }
 
 _builtin_to_generic = {
@@ -69,12 +74,97 @@ _builtin_to_generic = {
 _monoidal_attrs = ('mempty', 'mappend', 'mconcat')
 
 
-def is_monoid(obj, 
+def _get_generic_type(obj, generics=_generic_types,
+                      known_to_generics=_builtin_to_generic):
+    """Attempt to get the most generic type possible.
+
+    If the passed object is an instance of a builtin type,
+    then a simple dictionary lookup is performed, otherwise,
+
+    """
+    if type(obj) in known_to_generics:
+        return known_to_generics[type(obj)]
+    return next(filter(lambda g: isinstance(obj, g), generics), None)
+
+
+def _get_generic_mappend(generic, known_mappends=_known_mappends):
+    """Accepts a generic type and returns its generic mappend.
+    """
+    return known_mappends.get(generic, None)
+
+
+def _make_generic_mconcat(monoid, **kwargs):
+    """Attempts to build a generic mconcat by finding out the correct
+    mappend to use for the first monoid provided. If a generic mappend
+    cannot be determined, then a TypeError is raised (propagated by
+    get_generic_mappend).
+
+    It is possible to pass optional keyword arguments to get_generic_mappend
+    by using `**kwargs`.
+    """
+    mappend = get_generic_mappend(monoid, **kwargs)
+    return partial(reduce, mappend)
+
+
+def get_generic_mappend(obj, generics=_generic_types,
+                        known_to_generics=_builtin_to_generic,
+                        known_mappends=_known_mappends):
+    """Accepts an arbitrary object and attempts find its generic type and then
+    its generic mappend. If a generic type can't be determined, a type error
+    is raised.
+
+    Optionally, a customized iterable of generics, a mapping of known types
+    to generic types or a mapping of generic types to mappends can be passed.
+    """
+    generic = _get_generic_type(obj, generics, known_to_generics)
+
+    if generic is None:
+        raise TypeError("No known generic for {!r} instance of {!s}"
+                        "".format(obj, type(obj)))
+
+    mappend = _get_generic_mappend(generic, known_mappends)
+
+    if mappend is None:
+        raise TypeError("No known generic mappend for {!r} instance of {!s}"
+                        "".format(obj, type(obj)))
+
+    return mappend
+
+
+def get_generic_mempty(obj, known_mempties=_builtin_mempties):
+    """Accepts an object and tries to find its known mempty value. If no
+    known mempty exists, a TypeError is raised.
+
+    Optionally, a mapping of known type to mempty values can be passed. The
+    default value is a mapping of only types found in builtin: int, float,
+    complex, str, list, tuple, dict, set and frozenset.
+    """
+    mempty = known_mempties.get(type(obj), None)
+    if mempty is None:
+        raise TypeError("No known mempty for {!r} instance of {!s}"
+                        "".format(obj, type(obj)))
+    return mempty
+
+
+def generic_mconcat(*monoids, **kwargs):
+    """Generic implementation of mconcat for known monodic objects that don't
+    define it. To do this, a generic mappend must be able to be derived for
+    the first object in the sequence via get_generic_mappend. If that isn't
+    possible, then a TypeError is propagated from get_generic_mappend.
+
+    It is possible to pass optional keyword arguments down to
+    get_generic_mappend by using **kwargs.
+    """
+    mconcat = _make_generic_mconcat(monoids[0], **kwargs)
+    return mconcat(monoids)
+
+
+def is_monoid(obj,
               monoid_attrs=_monoidal_attrs,
-              generics=_generic_types, 
+              generics=_generic_types,
               known_to_generics=_builtin_to_generic,
               known_mempties=_builtin_mempties,
-              known_mappends=_generic_mappends):
+              known_mappends=_known_mappends):
     """Attempts to determine if an object is a monoid or not. When in doubt,
     this function returns false. For example, even though get_generic_mappend
     can derive a generic mappend for decimal.Decimal (it is, after all,
@@ -90,7 +180,7 @@ def is_monoid(obj,
     else:
         try:
             get_generic_mempty(obj, known_mempties=known_mempties)
-            get_generic_mappend(obj, 
+            get_generic_mappend(obj,
                                 generics=generics,
                                 known_to_generics=known_to_generics,
                                 known_mappends=known_mappends)
@@ -98,68 +188,3 @@ def is_monoid(obj,
             return False
         else:
             return True
-
-
-def _get_generic_type(obj, generics=_generic_types, 
-                      known_to_generics=_builtin_to_generic):
-    """Attempt to get the most generic type possible.
-    
-    If the passed object is an instance of a builtin type,
-    then a simple dictionary lookup is performed, otherwise,
-
-    """
-    if type(obj) in known_to_generics:
-        return known_to_generics[type(obj)]
-    return next(filter(lambda g: isinstance(obj, g), generics), None)
-
-
-def _get_generic_mappend(generic, known_mappends=_generic_mappends):
-    """Accepts a generic type and returns its generic mappend.
-    """
-    return known_mappends.get(generic, None)
-
-
-def get_generic_mappend(obj, generics=_generic_types,
-                        known_to_generics=_builtin_to_generic,
-                        known_mappends=_generic_mappends):
-    """Accepts an arbitrary object and attempts find its generic type and then
-    its generic mappend. If a generic type can't be determined, a type error
-    is raised.
-
-    Optionally, a customized iterable of generics, a mapping of known types
-    to generic types or a mapping of generic types to mappends can be passed.
-    """
-    generic = _get_generic_type(obj, generics, known_to_generics)
-
-    if generic is None:
-        raise TypeError("No known generic for {!r} instance of {!s}"
-                        "".format(obj, type(obj)))
-    
-    mappend = _get_generic_mappend(generic, known_mappends)
-
-    if mappend is None:
-        raise TypeError("No known generic mappend for {!r} instance of {!s}"
-                        "".format(obj, type(obj)))
-
-    return mappend
-
-
-def get_generic_mempty(obj, known_mempties=_builtin_mempties):
-    """Accepts an object and tries to find its known mempty value. If no
-    known mempty exists, a TypeError is raised.
-    
-    Optionally, a mapping of known type to mempty values can be passed. The
-    default value is a mapping of only types found in builtin: int, float,
-    complex, str, list, tuple, dict, set and frozenset.
-    """
-    mempty = known_mempties.get(type(obj), None)
-    if mempty is None:
-        raise TypeError("No known mempty for {!r} instance of {!s}"
-                        "".format(obj, type(obj)))
-    return mempty
-
-def generic_mconcat(mappend, *objs):
-    """Generic implementation of mconcat for known monodic objects that don't
-    define it.
-    """
-    return reduce(mappend, objs)
