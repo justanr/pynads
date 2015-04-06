@@ -84,7 +84,7 @@ def bad_get_int():
     x = randint(1,10)
     return x if x%2 else None
 
-inc = lambda x: x+1
+inc = lambda x: Just(x+1)
 
 Maybe(bad_get_int()) >> inc >> inc
 ```
@@ -150,7 +150,8 @@ Of course it'll make an appearance here, too!
 ```
 
 `%` was chosen because if you squint really hard, ignore the angle brackets,
-then `%` and `<$>` kinda look similar.
+then `%` and `<$>` kinda look similar. It's also on the same precedence
+level as `*`, forcing Python to evaluate it first without extra parens.
 
 ###Applicatives
 We got applicatives as well!
@@ -197,8 +198,7 @@ will delegate to. In addition, the monoid must define an `mempty` value
 which represents its "empty" or "zero" value.
 
 This class also provides a default implementation of mconcat which uses
-`functools.reduce` and the `mappend` method defined in the instance. However,
-this could likely be replaced by `sum` -- considerations for the future.
+`functools.reduce` and the `mappend` method defined in the instance.
 Subclasses of Monoid are welcome to replace `mconcat` with their own versions.
 
 `pynads` has two monoids: `pynads.List` and `pynads.Map`
@@ -207,11 +207,9 @@ But that doesn't stop `pynads` from mappending and mconcatting its way through
 built in types. int, float, complex, set, frozenset, bool, list, str, dict...
 `pynads` don't care, it'll figure out how to handle it. And it doesn't stop
 there, it can determine how to `mappend` a few non-built in types as well
-like `decimal.Decimal` or your class that extends from `collections.Set` --
-though, surprisingly, classes like `weakref.WeakSet` never end up being
-considered an extension of `collections.abc.Set` for some reason. Yes, yes, 
-it uses type checking but it tries its best to do it against  ABCs rather 
-than hard types.
+like `decimal.Decimal` or your class that extends from `collections.abc.Set`.
+Yes, yes, it uses type checking but it tries its best to do it against
+ABCs rather than hard types.
 
 ###Mempty
 With monoids comes mempty! And `pynads` has a pretty nifty trick up its
