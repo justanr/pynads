@@ -1,6 +1,23 @@
 """This module serves a singular purpose: Being able to accept an arbitrary
 object and determine the best way to use mappend and mconcat on it. Sometimes
 that best way is not at all.
+
+This module doesn't attempt to be exhaustive. If it was, there would be a
+million entries and half as many hacks to get things like datetime.datetime
+to appear monoidal. By not be exhaustive, it missing somethings that are
+obviously monoidal like decimal.Decimal, even though it can derive a generic
+mappend for that class.
+
+That said this module is extensible. Every function here accepts a host of
+optional keywords for providing customizable behavior.
+
+If set or dict shouldn't be considered monoidal in some context, then a
+custom look up table can be provided. If some custom container should always
+be considered a monoid, then importing and mutating the look up tables here
+is possible.
+
+However, discretion should be used for modifying behavior as Monoids follow
+a specific set of rules.
 """
 
 from collections import Sequence, Mapping, Set
