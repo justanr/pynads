@@ -1,6 +1,7 @@
 from ..utils import _iter_but_not_str_or_map
 from ..abc import Monad
-from ..funcs import fmap
+from ..funcs import fmap, mappend
+from ..utils import is_monoid
 from .list import List
 
 
@@ -10,17 +11,18 @@ class Writer(Monad):
     """
     __slots__ = ('log',)
 
-    def __init__(self, v, log):
+    def __init__(self, v, log=None):
         super(Writer, self).__init__(v)
 
-        if _iter_but_not_str_or_map(log):
-            self.log = List.unit([l for l in log])
-        else:
-            self.log = List.unit(log)
+        if log is None:
+            log = List()
+        elif not is_monoid(log):
+            log = List.unit(log)
+        self.log = log
 
     @classmethod
     def unit(cls, v):
-        return cls(v, [])
+        return cls(v, List())
 
     def fmap(self, f):
         return Writer(f(self.v), self.log)
@@ -29,8 +31,8 @@ class Writer(Monad):
         return fmap(self.v, applicative)
 
     def bind(self, f):
-        v, msg = f(self.v)
-        return Writer(v, self.log + (msg,))
+        v, entry = f(self.v)
+        return Writer(v, mappend(self.log, entry))
 
     def __repr__(self):
         return "Writer({!r}, {!r})".format(self.v, self.log)
