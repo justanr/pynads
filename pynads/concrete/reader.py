@@ -2,7 +2,7 @@
 """
 
 from ..abc import Monad, Container
-from ..utils import iscallable, _get_name, _get_names
+from ..utils import iscallable, _get_names
 from ..funcs import const, compose, identity
 
 
@@ -106,7 +106,7 @@ class Reader(Monad):
         return self.v(env)
 
     def __repr__(self):
-        return "{}({!s})".format(self.__class__.__name__, _get_name(self.v))
+        return "{}({!s})".format(*_get_names(self, self.v))
 
     @classmethod
     def unit(cls, v):
