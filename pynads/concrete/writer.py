@@ -84,7 +84,7 @@ class Writer(Monad):
         """Call a function with the stored value as the input. Nothing fancy
         here.
         """
-        return Writer(f(self.v), self.log)
+        return self.__class__(f(self.v), self.log)
 
     def apply(self, applicative):
         """Take a function stored in this Writer and apply it to the next
@@ -123,8 +123,7 @@ class Writer(Monad):
         TypeError.
         """
         w = f(self.v)
-        v, entry = w.v, w.log
-        return Writer(v, mappend(self.log, entry))
+        return self.__class__(w.v, mappend(self.log, w.log))
 
     def __repr__(self):
         return "Writer({!r}, {!r})".format(self.v, self.log)
