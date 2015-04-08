@@ -1,10 +1,10 @@
 import pytest
 from pynads import List
-from pynads.funcs import multiapply
+from pynads.funcs import multiapply, multibind
 
 
 add_two = lambda x: x+2
-plus_or_minus_two = lambda x: [x-2, x+2]
+minus_or_plus_two = lambda x: [x-2, x+2]
 plus_other = lambda x: lambda y: x+y
 
 
@@ -46,10 +46,10 @@ def test_List_add_raises_with_mapping():
     assert 'dict' in str(error.value)
 
 
-def test_List_mondoial_add():
+def test_List_monoidal_add():
     l =  List.unit(1)
-    assert l + (List.unit(2)) == List.unit([1,2])
-    assert l + (2,) == List.unit([1,2])
+    assert l + (List.unit(2)) == List(1,2)
+    assert l + (2,) == List(1,2)
 
 
 def test_List_mconcat():
@@ -64,24 +64,6 @@ def test_List_is_monoidal():
            List.mappend(List.mappend(ls[0], ls[1]), ls[2])
 
 
-def test_List_handles_str():
-    l = List("fred")
-    assert l.v == ("fred",)
-
-
-def test_List_handles_map():
-    assert List({1,2,3}).v == ({1,2,3},)
-
-
-def test_List_handles_seq():
-    assert List(*range(3)).v == (0,1,2)
-
-
-def test_List_handles_gen():
-    gen_list = List.unit(iter([1,2,3]))
-    assert gen_list.v == (1,2,3)
-
-
 def test_List_repr():
     assert repr(List(1,2,3)) == "List(1, 2, 3)"
     assert "...5 more..." in repr(List(*range(15)))
@@ -90,73 +72,103 @@ def test_List_repr():
 def test_List_unit():
     assert List.unit(1).v == (1,)
     assert List.unit('fred').v == ('fred',)
-    assert List.unit([1,2,3]).v == (1,2,3)
+    assert List.unit([1,2,3]).v == ([1,2,3],)
 
 
 def test_List_fmap():
-    l = List.unit(range(1,4))
+    l = List(1,2,3)
     assert l.fmap(add_two).v == (3,4,5)
 
 
 def test_List_apply():
-    l = List.unit(add_two)
-    l2 = l * List.unit([1,2,3])
-    assert l2.v == (3,4,5)
+    l = List(add_two) * List(1,2,3)
+    assert l.v == (3,4,5)
 
 
 def test_List_apply_two_funcs():
-    l = List.unit([add_two, add_two])
-    l2 = l * List.unit([1,2,3]) 
-    assert l2.v == (3,4,5,3,4,5)
+    l = List(add_two, add_two) * List(1,2,3)
+    assert l.v == (3,4,5,3,4,5)
 
 
 def test_List_multi_apply(): 
-    ls = [List.unit(x) for x in  (plus_other, [1,2,3], [1,2,3])]
-    l = multiapply(*ls)
+    ls = [List(*x) for x in ([1,2,3], [1,2,3])]
+    l = multiapply(List(plus_other), *ls)
     assert l.v == (2,3,4,3,4,5,4,5,6)
 
 
 def test_List_bind():
-    l = List.unit([1,2,3]) >> plus_or_minus_two
+    l = List(1,2,3) >> minus_or_plus_two
     assert l.v == (-1,3,0,4,1,5)
+
+
+def test_build_chessboard():
+    # shamelessly stolen from:
+    # https://github.com/dustingetz/pymonads/blob/master/list.py
+    ranks = 'abcdefg'
+    files = range(1,9)
+
+    l = List(*ranks) >> (lambda r:
+        List(*files) >> (lambda f:
+        List.unit((r,f))        ))
+
+    hardway = tuple((r,f) for r in ranks for f in files)
+    sliced = List(('a', 1), ('a', 2), ('a', 3))
+
+    assert l.v == hardway
+    assert l[:3] == sliced
+
+
+def test_ignore_second_bind():
+    l = List(1,2,3) >> (lambda a:
+        List(1,2)   >> (lambda _:
+        minus_or_plus_two(a)   ))
+
+    assert l.v == (-1, 3, -1, 3, 0, 4, 0, 4, 1, 5, 1, 5)
+
+
+def test_list_multibind():
+    l = multibind(List(1,2), minus_or_plus_two, minus_or_plus_two)
+    assert l.v == (-3, 1, 1, 5, -2, 2, 2, 6)
 
 
 # test boring list stuff to make sure it's proxied correctly...
 def test_List_getitem():
-    assert List.unit([1,2,3])[0] == 1
+    assert List(1,2,3)[0] == 1
 
 
 def test_List_slice_makes_List():
-    assert List.unit([1,2,3])[:] == List.unit([1,2,3])
+    assert List(1,2,3)[:] == List(1,2,3)
 
 
 def test_List_eq():
-    assert List.unit([1,2,3]) == List.unit([1,2,3])
-    assert List.unit(1) != List.unit([1,2])
+    assert List(1,2,3) == List(1,2,3)
+    assert List.unit(1) != List(1,2)
 
 
 def test_List_iter():
-    assert isinstance(iter(List()), type(iter(())))
+    tuple_iter_type = type(iter(tuple()))
+    List_monad_iter = iter(List())
+    assert isinstance(List_monad_iter, tuple_iter_type)
 
 
 def test_List_contains():
-    assert 1 in List.unit([1,2,3])
+    assert 1 in List(1,2,3)
 
 
 def test_List_len():
-    assert len(List.unit([1,2,3])) == 3
+    assert len(List(1,2,3)) == 3
 
 
 def test_List_iadd():
     l1 = l2 = List.unit(1)
     l1 += List.unit(2)
-    assert l1 == List.unit([1,2])
+    assert l1 == List(1,2)
     assert l1 is not l2
 
 
 def test_List_index():
-    assert List.unit([1,2,3]).index(3) == 2
+    assert List(1,2,3).index(3) == 2
 
 
 def test_List_count():
-    assert List.unit([1,1,3]).count(1) == 2
+    assert List(1,1,3).count(1) == 2
