@@ -132,7 +132,7 @@ class List(Monad, Monoid, Sequence):
                 instance Functor [] where
                     fmap = map
         """
-        return self.__class__(*list(map(f, self.v)))
+        return self.__class__(*[f(v) for v in self])
 
     def apply(self, other):
         """Using `<*>` between a ``[(a->b)]`` and a `[a]` in Haskell
