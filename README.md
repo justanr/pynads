@@ -69,13 +69,12 @@ Map.unit(('a', 4)) # Map({'a': 4})
 Reader.unit(4)     # Reader(const)
 ```
 
-The `List` monad is also smart enough to differ between strings and mappings
-and other types of iterables:
+`List` makes no promises of splatting iterables when using the unit method:
 
 ```python
 List.unit("hello")   # List("hello")
 List.unit({'a': 4})  # List({'a': 4})
-List.unit([4, 5])    # List(4, 5)
+List.unit([4, 5])    # List([4, 5])
 ```
 
 `Reader`'s unit method puts a value into a closure that ignores any input
