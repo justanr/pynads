@@ -13,6 +13,9 @@ def test_Mempty_mempty_is_Mempty():
     assert Mempty.mempty is Mempty
 
 
+def test_Mempty_is_false():
+    assert not Mempty
+
 @pytest.mark.parametrize('monoid', [
     [4], [{1,2}], [List(1,2)], [Map({'a': 10})],
     [True], pytest.mark.xfail([Decimal('0')])

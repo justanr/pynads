@@ -29,6 +29,9 @@ class _Mempty(Monoid):
     def __repr__(self):
         return 'Mempty'
 
+    # mempty is always false
+    __bool__ = __nonzero__ = lambda s: False
+
     def mappend(self, other):
         """When mempty is used to mappend something, it simply becomes
         the other value if it is monoidal. Otherwise, a TypeError is raised.
