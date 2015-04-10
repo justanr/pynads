@@ -82,7 +82,7 @@ class State(Monad):
     (the result of a stateful computation). put overwrites the current
     state and has no meaningful output value.
     """
-    #TODO: Finish docstring.
+    # TODO: Finish docstring.
     def __new__(cls, v):
         if not iscallable(v):
             raise TypeError("excepted callable type to be passed.")
@@ -96,9 +96,9 @@ class State(Monad):
                 newtype State s a = State { runState :: s -> (a,s) }
 
         State is pretty much a wrapper around a transition from some state
-        to some result, state pair. ``runState`` actually retrieves the 
+        to some result, state pair. ``runState`` actually retrieves the
         transistion function from the monad. Doing ``runState (myState) s``
-        actually outputs a (result, state) pair. 
+        actually outputs a (result, state) pair.
         """
         return self.v(state)
 
@@ -111,7 +111,7 @@ class State(Monad):
         we want it to also accept some state and then return the value and
         the state together.
         """
-        return cls(lambda s: (v,s))
+        return cls(lambda s: (v, s))
 
     def fmap(self, func):
         r"""Mapping a function over a stateful computation is similar, in
@@ -144,7 +144,7 @@ class State(Monad):
             .. code-block:: Haskell
                 instance Applicative (State s) where
                     pure a = State $ \s -> (a, s)
-                    stateF <*> stateV = State $ \s -> 
+                    stateF <*> stateV = State $ \s ->
                             let (f, s') = runState stateF s
                                 (v, s'') = runState stateV s'
                             in (f v, s'')
@@ -168,7 +168,7 @@ class State(Monad):
 
         This entire operation is wrapped in a function and placed inside
         a State monad.
-        
+
             .. code-block:: Haskell
                 instance Monad (State s) where
                     return a = State $ \s -> (a, s)

@@ -47,7 +47,7 @@ class _Mempty(Monoid):
         will also filter all instances of mempty out instead of relying
         on the _Mempty._reflected_mappend method.
         """
-        monoids = [m for m in monoids if not m is Mempty] 
+        monoids = [m for m in monoids if m is not Mempty]
         if not monoids:
             return Mempty
         return mconcat(*monoids, **kwargs)
