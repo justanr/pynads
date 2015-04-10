@@ -62,6 +62,7 @@ def test_complex_State_bind():
                         else push(3) >> (lambda _: push(8))
 
     assert (pop >> push_if)([10, 4, 3]) == ((), [2, 4, 3])
+    assert (pop >> push_if)([4, 3]) == ((), [8,3,3])
 
 
 def test_multibind_with_State():
