@@ -126,4 +126,4 @@ class Writer(Monad):
         return self.__class__(w.v[0], mappend(self.v[1], w.v[1]))
 
     def __repr__(self):
-        return "Writer({!r}, {!r})".format(self.v, self.log)
+        return "Writer({!r}, {!r})".format(*self.v)
