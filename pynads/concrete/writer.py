@@ -60,18 +60,18 @@ class Writer(Monad):
     that's the job of another monad. Rather, it's about keep tracking of the
     status of something as it passes through transformations.
     """
-    __slots__ = ('_log',)
+    __slots__ = ()
 
     def __init__(self, v, log=Mempty):
-        super(Writer, self).__init__(v)
 
         if not is_monoid(log):
             log = List.unit(log)
-        self._log = log
+
+        super(Writer, self).__init__((v, log))
 
     @property
     def log(self):
-        return self._log
+        return self.v[1]
 
     @classmethod
     def unit(cls, v):
@@ -84,15 +84,15 @@ class Writer(Monad):
         """Call a function with the stored value as the input. Nothing fancy
         here.
         """
-        return self.__class__(f(self.v), self.log)
+        return self.__class__(f(self.v[0]), self.v[1])
 
     def apply(self, applicative):
         """Take a function stored in this Writer and apply it to the next
         writer in the sequence. Nothing fancy here either.
         """
-        return fmap(self.v, applicative)
+        return fmap(self.v[0], applicative)
 
-    def bind(self, f):
+    def bind(self, func):
         """As explained in the class docstring, bind takes the value stored
         in an instance of Writer and feeds it to a function that accepts
         that value and outputs a Writer as well. A new Writer is created
@@ -122,8 +122,8 @@ class Writer(Monad):
         if your log is a boolean and you attempt merge them, you'll get a
         TypeError.
         """
-        w = f(self.v)
-        return self.__class__(w.v, mappend(self.log, w.log))
+        w = func(self.v[0])
+        return self.__class__(w.v[0], mappend(self.v[1], w.v[1]))
 
     def __repr__(self):
         return "Writer({!r}, {!r})".format(self.v, self.log)
