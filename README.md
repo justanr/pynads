@@ -15,7 +15,7 @@ I was good enough to include a test suite though.
 Quick Examples
 --------------
 
-Currently `Maybe`, `Either`, `List`, `Reader` and `Writer` are all 
+Currently `Maybe`, `Either`, `List`, `Reader`, `State` and `Writer` are all 
 implemented in either full or partial fashion. I've also included an 
 applicative dictionary instance named `Map`.
 
@@ -33,19 +33,22 @@ from pynads.funcs import multibind
 from itertools import repeat
 from functools import partial
 
-pairs = ((5, 'fizz'), (3, 'buzz'))
+pairs = ((3, 'fizz'), (5, 'buzz'))
 
 def fizzer(n, pairs):
-    fizzed = ''.join([buzz for fizz, buzz in pairs if not n % fizz]) or n
+    fizzed = ''.join([buzz for fizz, buzz in pairs if n and not n % fizz]) or n
     return Writer(n+1, {n:fizzed})
 
-multibind(Writer(1, {}), *repeat(partial(fizzer, pairs=pairs), 15))
-# Writer(16, {1:1, 2:2, 3:'buzz', 4:4, 5:'fizz', 6:'buzz', 7:7, 8:8,
-#             9:'buzz', 10:'fizz', 11:11, 12:'buzz', 13:13, 14:14
+multibind(Writer.unit(1), *repeat(partial(fizzer, pairs=pairs), 15))
+# Writer(16, {1:1, 2:2, 3:'fizz', 4:4, 5:'buzz', 6:'fizz', 7:7, 8:8,
+#             9:'fizz', 10:'buzz', 11:11, 12:'fizz', 13:13, 14:14
 #             15:'fizzbuzz'})
 ```
 
-Extensible and short. You can't out fizzbuzz this.
+Interviewer tried to one up you and asked for multiplies of 7 to evaluate to
+bazz? Modify the pairs tuple. Extensible and short. 
+
+You can't out fizzbuzz this.
 
 ###Putting values in Context
 
@@ -62,11 +65,12 @@ unit(4, Maybe)
 Unit on other Monads:
 
 ```python
-Either.unit(4)     # Right 4
-List.unit(4)       # List 4
-Writer.unit(4)     # Writer 4 List()
-Map.unit(('a', 4)) # Map({'a': 4})
-Reader.unit(4)     # Reader(const)
+Either.unit(4)      # Right 4
+List.unit(4)        # List 4
+Writer.unit(4)      # Writer (4, Mempty)
+Map.unit(('a', 4))  # Map({'a': 4})
+Reader.unit(4)      # Reader(const)
+State.unit(4)       # State(lambda s: (4, s))
 ```
 
 `List` makes no promises of splatting iterables when using the unit method:
@@ -83,6 +87,14 @@ and returns the original value.
 ```Python
 r = Reader.unit(4)
 print(r(None)) # boom, 4 pops out!
+```
+
+Kinda similar to ``Reader``, ``State``'s unit method creates a lambda that
+awaits some input but returns a tuple of ``(original_value, passed_value)``
+
+```Python
+s = State.unit(4)
+print(s(None)) # out pops (4, None)
 ```
 
 ###Bind, Shove, `>>=`, et. al
@@ -253,13 +265,11 @@ makes me yearn for real BBQ.
 Despite this being a toy implementation of Haskell things in Python, I've
 taken quite a shine to it. Currently, these are the things in the works:
 
-- State Monad (seems pretty similar to Reader, shouldn't be hard to hammer out)
 - do notation (by abusing the coroutine protocol and decorators)
 - Expanded notes section so if something seems really odd, you can see my
 thought process and the notes I've taken.
-- Expanded docstrings on par with Reader's documentation. Despite being a huge
-wall of text, I feel it adequately captures my thought process on both
-understanding and translating Reader from Haskell to Python.
+- Continuation Monad -- maybe, I'm not sure if I want to tackle this
+- Monad Transformers -- once I fully apperciate them
 
 ##Sources
 Of course, I didn't come up with this idea on my own. Many implementations
