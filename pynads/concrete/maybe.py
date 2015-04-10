@@ -89,6 +89,16 @@ class Maybe(Monad):
     itself over binds, mappings and applications. However, if `bad_get_int`
     returns a value, it's wrapped in Just which will allow operations to
     take effect on the value.
+
+    The way this works is when calling Maybe directly, an optional checker
+    can be passed. By default, it simply checks if the value passed is ``None``
+    however, any ``a -> Bool`` function can be subsituted:
+
+    >>> is_even = lambda x: not x%2
+    >>> Maybe(3, checker=is_even)
+    ... Nothing
+    >>> Maybe(4, checker=is_even)
+    ... Just(4)
     """
     __slots__ = ()
 

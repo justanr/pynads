@@ -73,6 +73,21 @@ Reader.unit(4)      # Reader(const)
 State.unit(4)       # State(lambda s: (4, s))
 ```
 
+The `Maybe` monad abuses `__new__` to perform a check when instantiating
+an object. You can pass a checker function to determine if a `Just` or
+`Nothing` should be returned. By default, if the value being passed is
+`None` you get a `Nothing`.
+
+```python
+>>> # only even Justs
+>>> is_even = lambda x: not x%2
+>>> Maybe(3, checker=is_even)
+... Nothing
+>>> Maybe(4, checker=is_even)
+```
+
+Shamelessly, this is lifted from [PyMonad](https://bitbucket.org/jason_delaat/pymonad>).
+
 `List` makes no promises of splatting iterables when using the unit method:
 
 ```python
@@ -209,7 +224,7 @@ from random import randint
 
 def bad_get_int():
     x = randint(1,10)
-    return x if x%2 else None
+    return Maybe(x if x%2 else None)
 
 add_two = lambda x: lambda y: x+y
 
