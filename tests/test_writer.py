@@ -1,5 +1,5 @@
 from pynads import Writer, Mempty, List
-from pynads.funcs import identity
+from pynads.funcs import identity, multibind
 import pytest
 
 
@@ -51,3 +51,19 @@ def test_writer_log_with_monoids(writer, func, value, log):
 def test_writer_dict_updates_multiple_times():
     w = Writer.unit(4) >> dict_add_two >> dict_div_two
     assert w.v == (3, {'added': 2, 'divided': 2})
+
+
+def test_fizzbuzz_with_Writer():
+    pairs = ((3, 'fizz'), (5, 'buzz'))
+
+    def fizzer(n, pairs):
+        fizzed = ''.join([b for f, b in pairs if n and not n % f]) or n
+        return Writer(n+1, {n:fizzed})
+
+    fizzers = [lambda n: fizzer(n, pairs)] * 15
+
+    fizzbuzzed = multibind(Writer.unit(1), *fizzers)
+    assert fizzbuzzed.v == (16, {1:1, 2:2, 3:'fizz', 4:4, 5:'buzz',
+                                 6:'fizz', 7:7, 8:8, 9:'fizz', 10:'buzz',
+                                 11:11, 12:'fizz', 13:13, 14:14,
+                                 15:'fizzbuzz'})
