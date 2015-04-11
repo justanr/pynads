@@ -50,14 +50,14 @@ class Map(Applicative, Monoid, Mapping):
         """
         return cls([v])
 
-    def fmap(self, f):
+    def fmap(self, func):
         """Maps a function over the values in the mapping.
 
         >>> m = Map({'a': 1, 'b': 2, 'c': 3})
         >>> m.fmap(lambda x: x+1)
         ... Map({'a': 2, 'b': 3, 'c': 4})
         """
-        return self.__class__({k: f(v) for k, v in self.v.items()})
+        return self.__class__({k: func(v) for k, v in self.v.items()})
 
     def apply(self, other):
         """Maps functions that appear in this mapping to their

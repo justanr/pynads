@@ -126,8 +126,8 @@ class Functor(with_metaclass(ABCMeta, Container)):
     __slots__ = ()
 
     @abstractmethod
-    def fmap(self, f):
+    def fmap(self, func):
         return False
 
-    def __rmod__(self, f):
-        return self.fmap(f)
+    def __rmod__(self, func):
+        return self.fmap(func)

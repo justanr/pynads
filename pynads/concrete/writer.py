@@ -80,11 +80,11 @@ class Writer(Monad):
         """
         return cls(v, Mempty)
 
-    def fmap(self, f):
+    def fmap(self, func):
         """Call a function with the stored value as the input. Nothing fancy
         here.
         """
-        return self.__class__(f(self.v[0]), self.v[1])
+        return self.__class__(func(self.v[0]), self.v[1])
 
     def apply(self, applicative):
         """Take a function stored in this Writer and apply it to the next
@@ -92,7 +92,7 @@ class Writer(Monad):
         """
         return fmap(self.v[0], applicative)
 
-    def bind(self, func):
+    def bind(self, bindee):
         """As explained in the class docstring, bind takes the value stored
         in an instance of Writer and feeds it to a function that accepts
         that value and outputs a Writer as well. A new Writer is created
@@ -122,7 +122,7 @@ class Writer(Monad):
         if your log is a boolean and you attempt merge them, you'll get a
         TypeError.
         """
-        w = func(self.v[0])
+        w = bindee(self.v[0])
         return self.__class__(w.v[0], mappend(self.v[1], w.v[1]))
 
     def __repr__(self):

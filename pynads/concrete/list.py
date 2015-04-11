@@ -122,7 +122,7 @@ class List(Monad, Monoid, Sequence):
         """
         return cls(v)
 
-    def fmap(self, f):
+    def fmap(self, func):
         """fmapping over a List monad is the same as using map on the
         underlying tuple with the provided function.
 
@@ -132,7 +132,7 @@ class List(Monad, Monoid, Sequence):
                 instance Functor [] where
                     fmap = map
         """
-        return self.__class__(*[f(v) for v in self])
+        return self.__class__(*[func(v) for v in self])
 
     def apply(self, other):
         """Using `<*>` between a ``[(a->b)]`` and a `[a]` in Haskell
@@ -153,7 +153,7 @@ class List(Monad, Monoid, Sequence):
         """
         return self.__class__(*[f(x) for f in self for x in other])
 
-    def bind(self, f):
+    def bind(self, bindee):
         """Binding a List monad to a function requires a little more
         explaination. In Haskell, ``[]`` doesn't represent a sequence
         necessarily, but rather a collection of choices.
@@ -214,7 +214,7 @@ class List(Monad, Monoid, Sequence):
         >>> List(1, 4, 9) >> true_root
         List(1.0, -1.0, 2.0, -2.0, 3.0, -3.0)
         """
-        return self.__class__(*chain.from_iterable(self.fmap(f)))
+        return self.__class__(*chain.from_iterable(self.fmap(bindee)))
 
     def mappend(self, other):
         """In Haskell. the ``mappend`` for ``[]`` is defined as ``(++)``

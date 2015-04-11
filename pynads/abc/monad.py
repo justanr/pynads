@@ -171,7 +171,7 @@ class Monad(Applicative):
     __slots__ = ()
 
     @abstractmethod
-    def bind(self, f):
+    def bind(self, bindee):
         r"""Pushes a value into a monadic transformer function.
 
         :param callable f: A callable the accepts a single plain value
@@ -188,7 +188,7 @@ class Monad(Applicative):
         """
         return False
 
-    def __rshift__(self, f):
+    def __rshift__(self, bindee):
         r"""Pushes a value into a monadic transformer function.
 
         :param callable f: A callable that accepts a single plain value
@@ -204,9 +204,9 @@ class Monad(Applicative):
         ... Just 6
 
         """
-        return self.bind(f)
+        return self.bind(bindee)
 
-    def __ilshift__(self, f):
+    def __ilshift__(self, bindee):
         r"""Helper operator. The same as using bind or >> but
         as an assignment operator. The return value is *new* monad
         not an altered one.
@@ -217,4 +217,4 @@ class Monad(Applicative):
         Left greater than 1
 
         """
-        return self.bind(f)
+        return self.bind(bindee)

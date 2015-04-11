@@ -125,11 +125,11 @@ class Right(Either):
     def __repr__(self):
         return "Right {!r}".format(self.v)
 
-    def fmap(self, f):
-        return Right(f(self.v))
+    def fmap(self, func):
+        return Right(func(self.v))
 
     def apply(self, applicative):
         return fmap(self.v, applicative)
 
-    def bind(self, f):
-        return f(self.v)
+    def bind(self, bindee):
+        return bindee(self.v)

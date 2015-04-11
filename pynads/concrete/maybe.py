@@ -128,14 +128,14 @@ class Just(Maybe):
     def __repr__(self):
         return "Just {!r}".format(self.v)
 
-    def fmap(self, f):
-        return Just(f(self.v))
+    def fmap(self, func):
+        return Just(func(self.v))
 
     def apply(self, applicative):
         return fmap(self.v, applicative)
 
-    def bind(self, f):
-        return f(self.v)
+    def bind(self, bindee):
+        return bindee(self.v)
 
     def __eq__(self, other):
         if isinstance(other, Just):

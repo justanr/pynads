@@ -245,7 +245,7 @@ class Reader(Monad):
 
         return self.__class__(applied)
 
-    def bind(self, g):
+    def bind(self, bindee):
         r"""Compare to Haskell's implemention of Monad for Reader:
 
             ..code-block: Haskell
@@ -298,7 +298,7 @@ class Reader(Monad):
         >>> computation({'a':10, 'b': 7})
         ... 17
         """
-        def bound(env, f=self, g=g):
+        def bound(env, f=self, g=bindee):
             r"""First run the function stored in this instance with the
             provided environment to get a result `a`. Feed that result to
             the function being bound to get a Reader instance. Finally,
@@ -312,7 +312,7 @@ class Reader(Monad):
             r = g(a)
             return r(env)
 
-        names = _get_names(self.v, g)
+        names = _get_names(self.v, bindee)
         bound.__doc__ = "Bind of {!s}".format(', '.join(names))
         bound.__name__ = '_x_'.join(names)
 

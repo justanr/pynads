@@ -155,7 +155,7 @@ class State(Monad):
             return (func(result), res_state)
         return self.__class__(state_applier)
 
-    def bind(self, func):
+    def bind(self, bindee):
         r"""Binding a State monad to a function is actually very similar
         to binding a function to a reader monad. Except the "environment"
         is modified along the way.
@@ -195,7 +195,7 @@ class State(Monad):
         >>> s([9,0,2,10])
         ... ((), [8,3,0,2,1,0])
         """
-        def state_binder(state, runner=self, maker=func):
+        def state_binder(state, runner=self, maker=bindee):
             value, runner_state = runner(state)
             return maker(value)(runner_state)
         return State(state_binder)
