@@ -3,7 +3,7 @@ from .exceptions import MonadReturn, MonadFinished
 from ..utils.compat import update_wrapper, wraps
 
 
-__all__  = ("kwargs_decorator", "mfinished", "mreturn")
+__all__ = ("kwargs_decorator", "mfinished", "mreturn")
 
 
 def kwargs_decorator(deco):
