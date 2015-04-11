@@ -303,7 +303,7 @@ class List(Monad, Monoid, Sequence):
         return x in self.v
 
     def __reversed__(self):
-        return reversed(self.v)
+        return List(*reversed(self.v))
 
     def index(self, x):
         return self.v.index(x)

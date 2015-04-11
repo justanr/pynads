@@ -172,3 +172,7 @@ def test_List_index():
 
 def test_List_count():
     assert List(1,1,3).count(1) == 2
+
+
+def test_List_reversed():
+    assert reversed(List(1,2,3)) == List(3,2,1)
