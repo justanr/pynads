@@ -1,7 +1,6 @@
 from collections import Sequence
 from itertools import chain
 from ..abc import Monad, Monoid
-from ..funcs import fmap
 from ..utils import _iter_but_not_str_or_map
 
 
