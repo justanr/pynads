@@ -1,6 +1,6 @@
 from functools import partial
 from .exceptions import MonadReturn, MonadFinished
-from .utils import kwargs_decorator, update_wrapper
+from ..utils import kwargs_decorator, update_wrapper
 
 
 __all__ = ('do',)
