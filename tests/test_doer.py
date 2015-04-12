@@ -1,3 +1,4 @@
+from __future__ import division # Py2 compat
 from pynads.do import do, mreturn, mfinished
 from pynads import Either, Left, Right
 from pynads import Maybe, Just, Nothing
