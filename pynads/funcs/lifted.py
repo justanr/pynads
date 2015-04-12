@@ -6,7 +6,7 @@ from .monoid import mappend
 from .pure import identity
 
 
-__all__ = ('fmap', 'unit', 'lift', 'multiapply', 'multibind'
+__all__ = ('fmap', 'unit', 'lift', 'multiapply', 'multibind',
            'cons', 'mcons', 'sequence', 'mapM')
 
 
