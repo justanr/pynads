@@ -1,5 +1,6 @@
 import sys
 from functools import WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES, partial
+from .internal import _get_name
 
 
 PY3 = sys.version_info[0] > 2
@@ -43,7 +44,13 @@ def update_wrapper(wrapper,
         try:
             value = getattr(wrapped, attr)
         except AttributeError:
-            pass
+            # apply some custom magic to extract a name off certain
+            # types of objects such as partial and actual objects
+            if attr == '__name__':
+                value = _get_name(wrapped)
+                if value:
+                    setattr(wrapper, '__name__', value)
+
         else:
             setattr(wrapper, attr, value)
 

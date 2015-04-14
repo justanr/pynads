@@ -59,17 +59,20 @@ def iscallable(func):
 
 
 def _get_name(obj):
-    """Attempts to extract name from a given callable.
+    """Attempts to extract name from a given object.
     """
-    # interop with functools.partial and objects that emulate it
-    if hasattr(obj, 'func') and hasattr(obj.func, '__name__'):
-        return "partialed {!s}".format(obj.func.__name__)
-    # callable object that isn't a function
-    elif not isfunction(obj) and hasattr(obj, '__class__'):
-        return obj.__class__.__name__
-    # must be just a regular function
-    else:
-        return obj.__name__
+    try:
+        # interop with functools.partial and objects that emulate it
+        if hasattr(obj, 'func') and hasattr(obj.func, '__name__'):
+            return "partialed {!s}".format(obj.func.__name__)
+        # callable object that isn't a function
+        elif not isfunction(obj) and hasattr(obj, '__class__'):
+            return obj.__class__.__name__
+        # must be just a regular function
+        else:
+            return obj.__name__
+    except AttributeError:
+        return ''
 
 
 def _get_names(*objs):
