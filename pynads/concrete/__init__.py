@@ -1,4 +1,5 @@
 from .either import Either, Left, Right
+from .identity import Identity
 from .list import List
 from .maybe import Maybe, Just, Nothing
 from .map import Map
