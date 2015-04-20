@@ -9,7 +9,7 @@ plus_other = lambda x: lambda y: x+y
 
 
 def test_List_mempty():
-    assert List.mempty == ()
+    assert List.mempty  == List()
 
 
 def test_List_mappend():
@@ -90,7 +90,7 @@ def test_List_apply_two_funcs():
     assert l.v == (3,4,5,3,4,5)
 
 
-def test_List_multi_apply(): 
+def test_List_multi_apply():
     ls = [List(*x) for x in ([1,2,3], [1,2,3])]
     l = multiapply(List(plus_other), *ls)
     assert l.v == (2,3,4,3,4,5,4,5,6)

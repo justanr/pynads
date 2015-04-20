@@ -8,7 +8,7 @@ from inspect import isfunction
 
 __all__ = ('_iter_but_not_str_or_map', '_propagate_self',
            '_single_value_iter', 'with_metaclass', '_get_names',
-           '_get_name', 'iscallable', 'chain_dict_update')
+           '_get_name', 'iscallable', 'chain_dict_update', 'classproperty')
 
 
 def _iter_but_not_str_or_map(maybe_iter):
@@ -104,3 +104,11 @@ def chain_dict_update(*ds):
     for d in ds:
         dct.update(d)
     return dct
+
+
+class classproperty(object):
+    def __init__(self, method):
+        self.method = method
+
+    def __get__(self, instance, cls):
+        return self.method(cls)
