@@ -2,8 +2,8 @@
 can be used.
 """
 from ..abc import Monoid
-from ..utils.compat import filter
-from ..funcs.monoid import is_monoid, mconcat, mempty, mappend
+from ..utils.internal import classproperty
+from ..funcs.monoid import mconcat, mempty, mappend
 
 
 __all__ = ('Mempty',)
@@ -19,18 +19,25 @@ class _Mempty(Monoid):
     """
     __slots__ = ()
     # _Mempty is its own mempty value
-    mempty = __inst = None
+    _mempty = None
+    _inst = None
 
     def __new__(cls):
-        if cls.__inst is None:
-            cls.mempty = cls.__inst = Monoid.__new__(cls)
-        return cls.__inst
+        if cls._inst is None:
+            cls._inst = Monoid.__new__(cls)
+        return cls._inst
 
     def __repr__(self):
         return 'Mempty'
 
     # mempty is always false
     __bool__ = __nonzero__ = lambda s: False
+
+    @classproperty
+    def mempty(cls):
+        if not cls._mempty:
+            cls._mempty = cls()
+        return cls._mempty
 
     def mappend(self, other):
         """When mempty is used to mappend something, it simply becomes
