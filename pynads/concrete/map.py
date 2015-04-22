@@ -1,5 +1,6 @@
 from collections import Mapping
 from ..abc import Applicative, Monoid
+from ..utils.internal import classproperty
 from ..utils import chain_dict_update
 
 
@@ -30,7 +31,7 @@ class Map(Applicative, Monoid, Mapping):
     then the last appearance wins.
     """
     __slots__ = ()
-    mempty = {}
+    _mempty = None
 
     def __init__(self, v=None, **kwds):
         data = {}
@@ -42,6 +43,12 @@ class Map(Applicative, Monoid, Mapping):
 
     def __repr__(self):
         return "{!s}({!r})".format(self.__class__.__name__, self.v)
+
+    @classproperty
+    def mempty(cls):
+        if cls._mempty is None:
+            cls._mempty = cls()
+        return cls._mempty
 
     @classmethod
     def unit(cls, v):

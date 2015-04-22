@@ -3,7 +3,7 @@ from pynads.funcs import identity
 
 
 def test_Map_mempty():
-    assert Map.mempty == {}
+    assert Map.mempty == Map()
 
 
 def test_Map_mappend():
@@ -85,6 +85,8 @@ def test_Map_apply_multiple_args_with_miss():
     assert q.v == {}
 
 # test required collections.Mapping methods as well as nicety methods
+
+
 def test_Map_len():
     assert len(Map({'a':1})) == 1
 
