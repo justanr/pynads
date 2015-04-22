@@ -37,9 +37,9 @@ class Identity(Monad):
     def fmap(self, func):
         """Fmapping over an Identity monad is the same as applying the
         function being mapped and then wrapping the result in an
-        Identity monad. 
+        Identity monad.
         """
-        return self.__class__(f(self.v))
+        return self.__class__(func(self.v))
 
     def apply(self, other):
         """Applying a function stored in an Identity monad in the same as
@@ -47,7 +47,7 @@ class Identity(Monad):
         as just applying the stored function to the stored value and returning
         the result wrapped up in an Identity monad.
         """
-        return self.__class__(other.fmap(self.v))
+        return self.__class__(self.v(other.v))
 
     def bind(self, bindee):
         """Binding a function to an Identity monad is the same as fmapping the

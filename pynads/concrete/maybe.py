@@ -1,5 +1,5 @@
-from ..funcs import fmap
 from ..abc import Monad, Container
+from ..funcs.lifted import fmap
 from ..utils import _propagate_self
 
 
@@ -129,10 +129,10 @@ class Just(Maybe):
         return "Just {!r}".format(self.v)
 
     def fmap(self, func):
-        return Just(func(self.v))
+        return self.__class__(func(self.v))
 
-    def apply(self, applicative):
-        return fmap(self.v, applicative)
+    def apply(self, other):
+        return self.__class__(self.v(other.v))
 
     def bind(self, bindee):
         return bindee(self.v)
