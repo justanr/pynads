@@ -8,7 +8,7 @@ from inspect import isfunction
 
 __all__ = ('_iter_but_not_str_or_map', '_propagate_self',
            '_single_value_iter', 'with_metaclass', '_get_names',
-           '_get_name', 'iscallable', 'chain_dict_update', 'classproperty')
+           '_get_name', 'iscallable', 'chain_dict_update', 'Instance')
 
 
 def _iter_but_not_str_or_map(maybe_iter):
@@ -106,9 +106,36 @@ def chain_dict_update(*ds):
     return dct
 
 
-class classproperty(object):
-    def __init__(self, method):
-        self.method = method
+class Instance(object):
+    """Helper to allow attaching an instance of a class to the class as a class
+    attribute.
 
-    def __get__(self, instance, cls):
-        return self.method(cls)
+    .. code-block:: python
+        class Thing(object):
+            thing = Instance()
+
+    `Thing.thing`` is an instance of the class itself. This is useful for
+    monoids whos mempty is just an empty instance of the class.
+
+    Additionally, if any arguments need to be provided, for whatever reason,
+    they can be inserted via the descriptor's instantiation.
+
+    .. code-block:: python
+        class Thing(object):
+            thing = Instance(hello="world")
+
+            def __init__(self, hello):
+                self.hello = hello
+
+    And then the instance is created with those values. The instance is cached
+    inside the descriptor and only created once per class.
+    """
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self._inst = None
+
+    def __get__(self, _, cls):
+        if self._inst is None:
+            self._inst = cls(*self.args, **self.kwargs)
+        return self._inst

@@ -1,7 +1,7 @@
 from collections import Sequence
 from itertools import chain
-from ..abc import Container, Monad, Monoid
-from ..utils import _iter_but_not_str_or_map, classproperty
+from ..abc import Monad, Monoid
+from ..utils.internal import _iter_but_not_str_or_map, Instance
 
 
 __all__ = ('List',)
@@ -77,7 +77,7 @@ class List(Monad, Monoid, Sequence):
     ... List(1.0, -1.0, 2.0, -2.0, 3.0, -3.0)
     """
     __slots__ = ()
-    _mempty = None
+    mempty = Instance()
 
     def __init__(self, *vs):
         # rather than tyring to do all sorts of
@@ -99,12 +99,6 @@ class List(Monad, Monoid, Sequence):
             body = ', '.join([repr(v) for v in self.v])
 
         return main.format(self.__class__.__name__, body)
-
-    @classproperty
-    def mempty(cls):
-        if not cls._mempty:
-            cls._mempty = cls()
-        return cls._mempty
 
     @classmethod
     def unit(cls, v):

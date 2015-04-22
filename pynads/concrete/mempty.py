@@ -2,7 +2,7 @@
 can be used.
 """
 from ..abc import Monoid
-from ..utils.internal import classproperty
+from ..utils.internal import Instance
 from ..funcs.monoid import mconcat, mempty, mappend
 
 
@@ -19,7 +19,7 @@ class _Mempty(Monoid):
     """
     __slots__ = ()
     # _Mempty is its own mempty value
-    _mempty = None
+    mempty = Instance()
     _inst = None
 
     def __new__(cls):
@@ -32,12 +32,6 @@ class _Mempty(Monoid):
 
     # mempty is always false
     __bool__ = __nonzero__ = lambda s: False
-
-    @classproperty
-    def mempty(cls):
-        if not cls._mempty:
-            cls._mempty = cls()
-        return cls._mempty
 
     def mappend(self, other):
         """When mempty is used to mappend something, it simply becomes
