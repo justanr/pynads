@@ -10,7 +10,7 @@ def test_known_mempty():
 
 
 def test_mempty_with_monoid():
-    assert monoid.mempty(List) == ()
+    assert monoid.mempty(List) == List()
 
 
 def test_mempty_raises_with_unknown():
@@ -61,6 +61,7 @@ def test_mappend_raises_with_unknown():
 def test_mconcat():
     ls = [List(x) for x in range(4)]
     assert monoid.mconcat(*ls) == List(0,1,2,3)
+
 
 def test_known_mconcat():
     ints = (1,2,3)
