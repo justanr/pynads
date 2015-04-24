@@ -4,6 +4,12 @@ from pynads import List
 import pytest
 
 
+ints = (1, 2, 3)
+
+def list_of(maker, stuff):
+    return [maker(x) for x in stuff]
+
+
 @pytest.mark.parametrize('o, expected', [
     (2, 0),
     ([1, 2], []),
@@ -73,25 +79,16 @@ def test_mconcat():
     assert monoid.mconcat(*ls) == List(0,1,2,3)
 
 
-def test_known_mconcat():
-    ints = (1,2,3)
-    floats = [float(x) for x in ints]
-    complexes = [complex(x) for x in ints]
-    decimals = [Decimal(str(x)) for x in ints]
-    strs = [str(x) for x in ints]
-    lists = [[x] for x in ints]
-    tuples = [(x,) for x in ints]
-    sets = [{x} for x in ints]
-    frozensets = [frozenset([x]) for x in ints]
-    dicts = [{x:x} for x in ints]
-
-    assert monoid.mconcat(*ints) == 6
-    assert monoid.mconcat(*floats) == 6.0
-    assert monoid.mconcat(*complexes) == 6+0j
-    assert monoid.mconcat(*decimals) == Decimal("6")
-    assert monoid.mconcat(*strs) == '123'
-    assert monoid.mconcat(*lists) == [1,2, 3]
-    assert monoid.mconcat(*tuples) == [1,2, 3]
-    assert monoid.mconcat(*sets) == {1,2, 3}
-    assert monoid.mconcat(*frozensets) == frozenset(ints)
-    assert monoid.mconcat(*dicts) == {1:1, 2:2, 3:3}
+@pytest.mark.parametrize('ms, res', [
+    (ints, 6),
+    (list_of(float, ints), 6.0),
+    (list_of(complex, ints), 6.0+0j),
+    (list_of(lambda a: {a}, ints), set(ints)),
+    (list_of(lambda a: frozenset([a]), ints), frozenset(ints)),
+    (list_of(lambda a: [a], ints), list(ints)),
+    (list_of(str, ints), '123'),
+    (list_of(lambda a: {a: a}, ints), {1: 1, 2: 2, 3: 3}),
+    (list_of(lambda a: (a, ), ints), [1, 2, 3,])
+])
+def test_known_mconcat(ms, res):
+    assert monoid.mconcat(*ms) == res

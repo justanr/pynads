@@ -2,7 +2,6 @@
 *are* monoidal but exist as basic types in Python.
 """
 
-
 from ..utils.monoidal import (get_generic_mappend, get_generic_mempty,
                               generic_mconcat, is_monoid)
 

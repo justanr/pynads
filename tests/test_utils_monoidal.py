@@ -9,6 +9,7 @@ from weakref import WeakSet
 
 ints = (1, 2, 3)
 
+
 def list_of(maker, stuff):
     return [maker(x) for x in stuff]
 
@@ -32,7 +33,7 @@ def test_get_generic_type(obj, type):
 
 
 @pytest.mark.parametrize('generic, mappend', [
-    (Sequence, m._seq_extend),
+    (Sequence, m._seq_mappend),
     (Set, or_),
     (str, add),
     (Number, add),
@@ -46,8 +47,8 @@ def test__get_generic_mappend_from_generic_type(generic, mappend):
 
 
 @pytest.mark.parametrize('obj, mappend', [
-    ([], m._seq_extend),
-    ((), m._seq_extend),
+    ([], m._seq_mappend),
+    ((), m._seq_mappend),
     (6, add),
     (6.0, add),
     (6+1j, add),
@@ -82,6 +83,15 @@ def test_get_generic_mempty_raises_with_unknown():
     with pytest.raises(TypeError) as error:
         m.get_generic_mempty(WeakSet())
     assert "No known" in str(error.value)
+
+
+@pytest.mark.parametrize('monoid, generic', [
+    ('', str),
+    ([], Sequence),
+    ({}, Mapping)
+])
+def test_make_generic_mconcat_on_selected(monoid, generic):
+    assert m._make_generic_mconcat(monoid) is m._generic_mconcats[generic]
 
 
 @pytest.mark.parametrize('objs, expected', [

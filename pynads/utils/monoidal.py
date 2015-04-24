@@ -48,17 +48,22 @@ _generic_mempties = {
 }
 
 
-def _seq_extend(*seqs): return list(chain.from_iterable(seqs))
+def _seq_mappend(*seqs): return list(chain.from_iterable(seqs))
 
 _generic_mappends = {
     Number: add,
     str: add,
-    Sequence: _seq_extend,
+    Sequence: _seq_mappend,
     Mapping: chain_dict_update,
     Set: or_,
     bool: or_
 }
 
+_generic_mconcats = {
+    str: ''.join,
+    Sequence: lambda seqs: _seq_mappend(*seqs),
+    Mapping: lambda ds: chain_dict_update(*ds),
+}
 
 _builtin_to_generic = {
     int: Number,
@@ -77,7 +82,9 @@ _monoidal_attrs = ('mempty', 'mappend', 'mconcat')
 
 
 def _get_generic_type(obj, generics=_generic_types,
-                      known_to_generics=_builtin_to_generic):
+                      known_to_generics=_builtin_to_generic,
+                      **kwargs
+                      ):
     """Attempt to get the most generic type possible.
 
     If the passed object is an instance of a builtin type,
@@ -89,28 +96,35 @@ def _get_generic_type(obj, generics=_generic_types,
     return next(filter(lambda g: isinstance(obj, g), generics), None)
 
 
-def _get_generic_mappend(generic, known_mappends=_generic_mappends):
+def _get_generic_mappend(generic, known_mappends=_generic_mappends, **kwargs):
     """Accepts a generic type and returns its generic mappend.
     """
     return known_mappends.get(generic, None)
 
 
-def _make_generic_mconcat(monoid, **kwargs):
-    """Attempts to build a generic mconcat by finding out the correct
-    mappend to use for the first monoid provided. If a generic mappend
-    cannot be determined, then a TypeError is raised (propagated by
-    get_generic_mappend).
+def _make_generic_mconcat(monoid, known_mconcats=_generic_mconcats, **kwargs):
+    """Attempts to return a generic mconcat method by checking if the generic
+    type has a known mconcat implementation already or by deriving a generic
+    mappend implementation and building a generic mconcat with the mappend and
+    reduce.
+
+    If the mappend path is taken and a generic mappend can't be determined,
+    then a TypeError is raised (propagated by get_generic_mappend).
 
     It is possible to pass optional keyword arguments to get_generic_mappend
-    by using `**kwargs`.
+    by using `**kwargs` and to override the known_mconcats by providing a dict
+    or dict-like mapping of types to functions.
     """
-    mappend = get_generic_mappend(monoid, **kwargs)
-    return partial(reduce, mappend)
+    generic = _get_generic_type(monoid)
+    if generic and generic in known_mconcats:
+        return known_mconcats[generic]
+    else:
+        return partial(reduce, get_generic_mappend(monoid, **kwargs))
 
 
 def get_generic_mappend(obj, generics=_generic_types,
                         known_to_generics=_builtin_to_generic,
-                        known_mappends=_generic_mappends):
+                        known_mappends=_generic_mappends, **kwargs):
     """Accepts an arbitrary object and attempts find its generic type and then
     its generic mappend. If a generic type can't be determined, a type error
     is raised.
@@ -133,7 +147,7 @@ def get_generic_mappend(obj, generics=_generic_types,
     return mappend
 
 
-def get_generic_mempty(obj, known_mempties=_generic_mempties):
+def get_generic_mempty(obj, known_mempties=_generic_mempties, **kwargs):
     """Accepts an object and tries to find its known mempty value. If no
     known mempty exists, a TypeError is raised.
 
@@ -141,7 +155,7 @@ def get_generic_mempty(obj, known_mempties=_generic_mempties):
     default value is a mapping of only types found in builtin: int, float,
     complex, str, list, tuple, dict, set and frozenset.
     """
-    generic = _get_generic_type(obj)
+    generic = _get_generic_type(obj, **kwargs)
 
     mempty = known_mempties.get(generic, None)
     if mempty is None:
@@ -168,7 +182,8 @@ def is_monoid(obj,
               generics=_generic_types,
               known_to_generics=_builtin_to_generic,
               known_mempties=_generic_mempties,
-              known_mappends=_generic_mappends):
+              known_mappends=_generic_mappends,
+              **kwargs):
     """Attempts to determine if an object is a monoid or not. When in doubt,
     this function returns false. For example, even though get_generic_mappend
     can derive a generic mappend for decimal.Decimal (it is, after all,
