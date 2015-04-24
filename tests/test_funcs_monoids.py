@@ -3,10 +3,20 @@ from pynads.funcs import monoid
 from pynads import List
 import pytest
 
-def test_known_mempty():
-    objs = (2, [1,2], {'a':1}, {4}, 'hello', 1.2, frozenset([4]), (4,), 1+0j)
 
-    assert all(monoid.mempty(o) == type(o)() for o in objs)
+@pytest.mark.parametrize('o, expected', [
+    (2, 0),
+    ([1, 2], []),
+    ({'a': 1}, {}),
+    ({4}, set()),
+    ('hello', ''),
+    (1.2, 0),
+    (frozenset([4]), set()),
+    ((4,), []),
+    (1+0j, 0)
+])
+def test_known_mempty(o, expected):
+    assert monoid.mempty(o) == expected
 
 
 def test_mempty_with_monoid():
