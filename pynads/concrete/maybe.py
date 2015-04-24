@@ -1,6 +1,5 @@
 from ..abc import Monad, Container
-from ..funcs.lifted import fmap
-from ..utils import _propagate_self
+from ..utils.internal import _propagate_self
 
 
 __all__ = ('Maybe', 'Just', 'Nothing')
@@ -132,7 +131,7 @@ class Just(Maybe):
         return self.__class__(func(self.v))
 
     def apply(self, other):
-        return self.__class__(self.v(other.v))
+        return other.fmap(self.v)
 
     def bind(self, bindee):
         return bindee(self.v)
@@ -161,6 +160,7 @@ class _Nothing(Maybe):
         return "Nothing"
 
     fmap = apply = bind = _propagate_self
+
 
 # Singleton Nothing
 Nothing = _Nothing()
