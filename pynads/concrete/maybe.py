@@ -1,5 +1,8 @@
+from abc import abstractmethod
 from ..abc import Monad, Container
-from ..utils.internal import _propagate_self
+from ..utils.compat import wraps
+from ..utils.decorators import kwargs_decorator
+from ..utils.internal import _propagate_self, Instance
 
 
 __all__ = ('Maybe', 'Just', 'Nothing')
@@ -98,6 +101,15 @@ class Maybe(Monad):
     ... Nothing
     >>> Maybe(4, checker=is_even)
     ... Just(4)
+
+    Since monads aren't just about the bind operator, but really about
+    sequencing operations, the Maybe monad here is combined with Scala's Option
+    monad. The implementation here is inspired by fn.py's version of Option.
+
+    It's also possible to decorator callables with Maybe via ``Maybe.wrap``
+    which wraps the output of a function in the Maybe monad. Optionally, the
+    checker function for Maybe can be provided if the default shouldn't be
+    used.
     """
     __slots__ = ()
 
@@ -115,6 +127,34 @@ class Maybe(Monad):
     def unit(v):
         return Just(v)
 
+    @staticmethod
+    @kwargs_decorator
+    def wrap(func, checker=lambda v: v is not None):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return Maybe(func(*args, **kwargs), checker=checker)
+        return wrapper
+
+    @abstractmethod
+    def filter(self, predicate):
+        pass
+
+    @abstractmethod
+    def get_or(self, default):
+        pass
+
+    @abstractmethod
+    def get_or_call(self, func, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def or_else(self, default):
+        pass
+
+    @abstractmethod
+    def or_call(self, func, *args, **kwargs):
+        pass
+
 
 class Just(Maybe):
     """Represents a value from a calculation.
@@ -127,8 +167,13 @@ class Just(Maybe):
     def __repr__(self):
         return "Just {!r}".format(self.v)
 
+    def __eq__(self, other):
+        if isinstance(other, Just):
+            return self.v == other.v
+        return NotImplemented
+
     def fmap(self, func):
-        return self.__class__(func(self.v))
+        return Just(func(self.v))
 
     def apply(self, other):
         return other.fmap(self.v)
@@ -136,20 +181,30 @@ class Just(Maybe):
     def bind(self, bindee):
         return bindee(self.v)
 
-    def __eq__(self, other):
-        if isinstance(other, Just):
-            return self.v == other.v
-        return NotImplemented
+    def filter(self, predicate):
+        return self if predicate(self.v) else Nothing
+
+    def get_or(self, default):
+        return self.v
+
+    def get_or_call(self, *args, **kwargs):
+        return self.v
+
+    or_else = or_call = _propagate_self
 
 
 class _Nothing(Maybe):
     """Singleton class representing a monadic failure in a computation.
 
-    fmap, apply and bind all return the singleton instance of Nothing
-    and short circuits all further bind operations.
+    filter, fmap, apply and bind all return the singleton instance of Nothing
+    and short circuits all further operations. However, get_or, get_or_call,
+    or_else, and or_call all provide ways of recovering, so to speak, from a
+    failed computation by being able to provide backup values to be provided
+    in place of the Nothing
     """
     __slots__ = ()
     __inst = None
+    v = Instance()  # lol
 
     def __new__(self, value=None):
         if self.__inst is None:
@@ -159,8 +214,26 @@ class _Nothing(Maybe):
     def __repr__(self):
         return "Nothing"
 
-    fmap = apply = bind = _propagate_self
+    def __eq__(self, other):
+        return isinstance(other, _Nothing)
 
+    filter = fmap = apply = bind = _propagate_self
+
+    @staticmethod
+    def get_or(default):
+        return default
+
+    @staticmethod
+    def get_or_call(func, *args, **kwargs):
+        return func(*args, **kwargs)
+
+    @staticmethod
+    def or_else(default):
+        return Maybe(default)
+
+    @staticmethod
+    def or_call(func, *args, **kwargs):
+        return Maybe(func(*args, **kwargs))
 
 # Singleton Nothing
 Nothing = _Nothing()

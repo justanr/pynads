@@ -21,9 +21,17 @@ def _iter_but_not_str_or_map(maybe_iter):
 
 
 def _propagate_self(self, *_, **__):
-    """Nothing, Left and potentially other monads are special in that they
-    represent some sort of failure. Rather than allowing further
-    computations, they simply propagate themselves instead.
+    """Some object methods, rather doing anything meaningful with their input,
+    would prefer to simply propagate themselves along. For example, this is used
+    in two different ways with Just and Nothing.
+
+    When calling any of the or_else and or_call methods on Just, there is
+    already a value provided (whatever the Just is) so these methods simply
+    ignore their inputs and propagate the Just along.
+
+    However, when filtering, fmapping, applying or binding a Nothing
+    (and also a Left), this method is used to signal some sort of failure in the
+    chain and propagate the original object along instead.
     """
     return self
 
