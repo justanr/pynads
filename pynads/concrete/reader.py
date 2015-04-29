@@ -3,7 +3,7 @@
 
 from ..abc import Monad, Container
 from ..utils import iscallable, _get_names
-from ..funcs import const, compose, identity
+from ..funcs import const, compose
 
 
 class Reader(Monad):
@@ -145,7 +145,7 @@ class Reader(Monad):
         >>> f(1)
         ... 3
         """
-        return self.__class__(compose(func, self))
+        return Reader(compose(func, self))
 
     def apply(self, applicative):
         r"""Compare to Haskell's applicative instance of Reader and (->)
@@ -243,7 +243,7 @@ class Reader(Monad):
         applied.__doc__ = "Application of {!s}".format(', '.join(names))
         applied.__name__ = '_o_'.join(names)
 
-        return self.__class__(applied)
+        return Reader(applied)
 
     def bind(self, bindee):
         r"""Compare to Haskell's implemention of Monad for Reader:
@@ -316,7 +316,7 @@ class Reader(Monad):
         bound.__doc__ = "Bind of {!s}".format(', '.join(names))
         bound.__name__ = '_x_'.join(names)
 
-        return self.__class__(bound)
+        return Reader(bound)
 
 
 # since Reader is just a wrapper around a function

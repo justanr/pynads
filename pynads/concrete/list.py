@@ -88,7 +88,7 @@ class List(Monad, Monoid, Sequence):
         super(List, self).__init__(vs)
 
     def __repr__(self):
-        main = "{!s}({!s})"
+        main = "List({!s})"
         if len(self) > 10:
             head = self.v[:5]
             middle = '...{!s} more...'.format(len(self) - 10)
@@ -98,7 +98,7 @@ class List(Monad, Monoid, Sequence):
         else:
             body = ', '.join([repr(v) for v in self.v])
 
-        return main.format(self.__class__.__name__, body)
+        return main.format(body)
 
     @classmethod
     def unit(cls, v):
@@ -131,7 +131,7 @@ class List(Monad, Monoid, Sequence):
                 instance Functor [] where
                     fmap = map
         """
-        return self.__class__(*[func(v) for v in self])
+        return List(*[func(v) for v in self])
 
     def apply(self, other):
         """Using `<*>` between a ``[(a->b)]`` and a `[a]` in Haskell
@@ -150,7 +150,7 @@ class List(Monad, Monoid, Sequence):
 
         Which is exactly how this is implemented.
         """
-        return self.__class__(*[f(x) for f in self for x in other])
+        return List(*[f(x) for f in self for x in other])
 
     def bind(self, bindee):
         """Binding a List monad to a function requires a little more
@@ -213,7 +213,7 @@ class List(Monad, Monoid, Sequence):
         >>> List(1, 4, 9) >> true_root
         List(1.0, -1.0, 2.0, -2.0, 3.0, -3.0)
         """
-        return self.__class__(*chain.from_iterable(self.fmap(bindee)))
+        return List(*chain.from_iterable(self.fmap(bindee)))
 
     def mappend(self, other):
         """In Haskell. the ``mappend`` for ``[]`` is defined as ``(++)``
@@ -236,7 +236,7 @@ class List(Monad, Monoid, Sequence):
                             "{!s} instance, not {!s}"
                             "".format(type(self), type(other)))
         else:
-            return self.__class__(*chain(self, other))
+            return List(*chain(self, other))
 
     @classmethod
     def mconcat(cls, *monoids):
@@ -289,7 +289,7 @@ class List(Monad, Monoid, Sequence):
 
     def __getitem__(self, idx):
         if isinstance(idx, slice):
-            return self.__class__(*self.v[idx])
+            return List(*self.v[idx])
         return self.v[idx]
 
     def __len__(self):

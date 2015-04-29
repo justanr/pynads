@@ -1,4 +1,3 @@
-from ..utils import _iter_but_not_str_or_map
 from ..abc import Monad
 from ..funcs import fmap, mappend
 from ..utils import is_monoid
@@ -84,7 +83,7 @@ class Writer(Monad):
         """Call a function with the stored value as the input. Nothing fancy
         here.
         """
-        return self.__class__(func(self.v[0]), self.v[1])
+        return Writer(func(self.v[0]), self.v[1])
 
     def apply(self, applicative):
         """Take a function stored in this Writer and apply it to the next
@@ -123,7 +122,7 @@ class Writer(Monad):
         TypeError.
         """
         w = bindee(self.v[0])
-        return self.__class__(w.v[0], mappend(self.v[1], w.v[1]))
+        return Writer(w.v[0], mappend(self.v[1], w.v[1]))
 
     def __repr__(self):
         return "Writer({!r}, {!r})".format(*self.v)

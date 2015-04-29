@@ -1,7 +1,6 @@
 """The State monad is all about defining and passing a shared state on your
 terms rather than relying on things scoping and global mutation.
 """
-from collections import namedtuple
 from ..abc import Monad, Container
 from ..utils import iscallable, _get_names, wraps
 
@@ -132,7 +131,7 @@ class State(Monad):
             result, new_state = runner(state)
             return (func(result), state)
 
-        return self.__class__(state_mapper)
+        return State(state_mapper)
 
     def apply(self, applicative):
         r"""Using Applicative State instances is interesting. The first
@@ -153,7 +152,7 @@ class State(Monad):
             func, func_state = state_f(state)
             result, res_state = state_v(func_state)
             return (func(result), res_state)
-        return self.__class__(state_applier)
+        return State(state_applier)
 
     def bind(self, bindee):
         r"""Binding a State monad to a function is actually very similar

@@ -42,7 +42,7 @@ class Map(Applicative, Monoid, Mapping):
         super(Map, self).__init__(data)
 
     def __repr__(self):
-        return "{!s}({!r})".format(self.__class__.__name__, self.v)
+        return "Map({!r})".format(self.v)
 
     @classmethod
     def unit(cls, v):
@@ -58,7 +58,7 @@ class Map(Applicative, Monoid, Mapping):
         >>> m.fmap(lambda x: x+1)
         ... Map({'a': 2, 'b': 3, 'c': 4})
         """
-        return self.__class__({k: func(v) for k, v in self.v.items()})
+        return Map({k: func(v) for k, v in self.v.items()})
 
     def apply(self, other):
         """Maps functions that appear in this mapping to their
@@ -82,7 +82,7 @@ class Map(Applicative, Monoid, Mapping):
         """
         keys = set(self.keys()) & set(other.keys())
         staging = {k: self[k](other[k]) for k in keys}
-        return self.__class__(staging)
+        return Map(staging)
 
     @classmethod
     def fromkeys(cls, keys, value=None):
@@ -98,7 +98,7 @@ class Map(Applicative, Monoid, Mapping):
         """Joining two mapping together is as easy as creating a new mapping
         representing the values from both mappings.
         """
-        return self.__class__(chain_dict_update(self, other))
+        return Map(chain_dict_update(self, other))
 
     @classmethod
     def mconcat(cls, *ds):
