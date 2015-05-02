@@ -5,9 +5,10 @@ add_two = lambda x: x+2
 m_add_two = lambda x: Right(add_two(x))
 l_add_two = lambda x: Left("failed")
 
+
 def test_cant_make_either():
-    with pytest.raises(TypeError) as excinfo:
-        e = Either()
+    with pytest.raises(TypeError):
+        Either()
 
 
 def test_truthiness():
@@ -37,3 +38,14 @@ def test_right_bind():
 
 def test_left_propagates():
     assert (Right(2) >> l_add_two >> add_two) == Left('failed')
+
+
+def test_Either_as_wrapper():
+    @Either.as_wrapper(expect=KeyError)
+    def get_key(d, key):
+        """Returns value from dict based on key"""
+        return d[key]
+
+    assert get_key.__doc__ == "Returns value from dict based on key"
+    assert get_key({'a': 4}, 'a') == Right(4)
+    assert get_key({}, 'a') == Left("KeyError('a',)")

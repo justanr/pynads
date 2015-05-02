@@ -2,10 +2,10 @@ from functools import partial
 from .compat import wraps
 
 
-__all__ = ('kwargs_decorator', 'annotate')
+__all__ = ('optional_kwargs', 'annotate', 'method_optional_kwargs')
 
 
-def kwargs_decorator(deco):
+def optional_kwargs(deco):
     """This is a decorator-decorator (a metadecorator if you will) that allows
     creating decorators that accept keyword arguments. It's a relatively
     simple trick of checking if the wrapper -- which stands in for the actual
@@ -14,7 +14,7 @@ def kwargs_decorator(deco):
     happen until the func param is filled.
 
     .. code-block:: python
-        @kwargs_decorator
+        @optional_kwargs
         def kwarg_deco(f, pre, post):
             def wrapper(*a, **k):
                 print(pre)
@@ -53,7 +53,7 @@ def kwargs_decorator(deco):
     But by providing default arguments, it can be made to appear reentrant:
 
     .. code-block:: Python
-        @kwargs_decorator
+        @optional_kwargs
         def my_kwarg_deco(f, pre='', post=''):
             # as before
 
@@ -109,7 +109,7 @@ def kwargs_decorator(deco):
     return wrapper
 
 
-@kwargs_decorator
+@optional_kwargs
 def annotate(func, type):
     """Decorator for adding Haskell style type annotations to a function's
     docstring on the fly.
@@ -122,3 +122,39 @@ def annotate(func, type):
                                              type,
                                              old_doc)
     return func
+
+
+class method_optional_kwargs(object):
+    """Descriptor based take on optional_kwargs used for method decorators.
+
+    Can be used to wrap regular instance methods, classmethods and
+    staticmethods. Currently does npt function on other sorts of descriptors.
+    """
+    def __init__(self, method):
+        self.method = method
+        self._deco = None
+
+    def __get__(self, instance, cls):
+        if self._deco:
+            return self._deco
+
+        if hasattr(self.method, '__func__'):  # classmethor or staticmethod
+            method = self.method.__func__
+            if isinstance(self.method, classmethod):
+                inst_or_cls = cls
+            else:
+                inst_or_cls = None
+        else:  # regular method TODO: what about other descriptor types?
+            inst_or_cls = instance
+            method = self.method
+
+        @wraps(method)
+        @optional_kwargs
+        def deco(func, **kwargs):
+            if inst_or_cls:
+                return method(inst_or_cls, func, **kwargs)
+            else:
+                return method(func, **kwargs)
+
+        self._deco = deco
+        return deco

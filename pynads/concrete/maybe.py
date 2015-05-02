@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from ..abc import Monad, Container
 from ..utils.compat import wraps
-from ..utils.decorators import kwargs_decorator
+from ..utils.decorators import method_optional_kwargs
 from ..utils.internal import _propagate_self, Instance
 
 
@@ -106,10 +106,10 @@ class Maybe(Monad):
     sequencing operations, the Maybe monad here is combined with Scala's Option
     monad. The implementation here is inspired by fn.py's version of Option.
 
-    It's also possible to decorator callables with Maybe via ``Maybe.wrap``
-    which wraps the output of a function in the Maybe monad. Optionally, the
-    checker function for Maybe can be provided if the default shouldn't be
-    used.
+    It's also possible to decorator callables with Maybe via
+    ``Maybe.as_wrapper`` which wraps the output of a function in the Maybe
+    monad. Optionally, the checker function for Maybe can be provided if the
+    default shouldn't be used.
     """
     __slots__ = ()
 
@@ -127,12 +127,27 @@ class Maybe(Monad):
     def unit(v):
         return Just(v)
 
-    @staticmethod
-    @kwargs_decorator
-    def wrap(func, checker=lambda v: v is not None):
+    @method_optional_kwargs
+    @classmethod
+    def as_wrapper(cls, func, checker=lambda v: v is not None):
+        """Allows using Maybe as a decorator with an optional checker
+        function. The default is simply the same as Maybe's default.
+
+        .. code-block:: python
+            # use the default checker
+            @Maybe.as_wrapper
+            def bad_get_int():
+                x = randint(1, 4)
+                return x if x % 2 else None
+
+            # provide a checker function
+            @Maybe.as_wrapper(checker=lambda x: x % 2)
+            def bad_get_int():
+                return randint(1, 4)
+        """
         @wraps(func)
         def wrapper(*args, **kwargs):
-            return Maybe(func(*args, **kwargs), checker=checker)
+            return cls(func(*args, **kwargs), checker=checker)
         return wrapper
 
     @abstractmethod
@@ -203,13 +218,13 @@ class _Nothing(Maybe):
     in place of the Nothing
     """
     __slots__ = ()
-    __inst = None
+    _inst = None
     v = Instance()  # lol
 
-    def __new__(self, value=None):
-        if self.__inst is None:
-            self.__inst = Container.__new__(self)
-        return self.__inst
+    def __new__(cls, value=None):
+        if cls._inst is None:
+            cls._inst = Container.__new__(cls)
+        return cls._inst
 
     def __repr__(self):
         return "Nothing"

@@ -1,6 +1,8 @@
 from ..funcs import fmap
 from ..abc import Monad
-from ..utils import _propagate_self
+from ..utils.compat import wraps
+from ..utils.decorators import method_optional_kwargs
+from ..utils.internal import _propagate_self
 
 
 class Either(Monad):
@@ -91,6 +93,17 @@ class Either(Monad):
         return isinstance(self, Right)
 
     __nonzero__ = __bool__
+
+    @method_optional_kwargs
+    @staticmethod
+    def as_wrapper(func, expect=Exception):
+        @wraps(func)
+        def tryer(*args, **kwargs):
+            try:
+                return Right(func(*args, **kwargs))
+            except expect as e:
+                return Left(repr(e))
+        return tryer
 
     @staticmethod
     def unit(v):

@@ -110,7 +110,7 @@ def test_Nothing_chain_many():
 
 
 def test_Maybe_wrap():
-    @Maybe.wrap(checker=lambda x: x & 1)
+    @Maybe.as_wrapper(checker=lambda x: x % 2)
     def derp(x):
         'Subtract one from a number.'
         return x - 1
