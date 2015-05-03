@@ -1,9 +1,8 @@
-from abc import ABCMeta, abstractmethod
-from .container import Container
-from ..utils import with_metaclass
+from abc import abstractmethod
+from .container import ContainerABC
 
 
-class Functor(with_metaclass(ABCMeta, Container)):
+class Functor(ContainerABC):
     """Functors are data types that know how to be mapped over.
 
     Consider the Haskell Functor typeclass:

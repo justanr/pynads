@@ -1,3 +1,6 @@
+from abc import ABCMeta
+
+
 class Container(object):
     """Basic container object to serve as a base for Functor, Applicative
     and Monad, as most derived classes need only one argument. However,
@@ -42,3 +45,6 @@ class Container(object):
     @property
     def v(self):
         return self._get_val()
+
+
+ContainerABC = ABCMeta('ContainerABC', (Container,), {})

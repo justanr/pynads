@@ -1,10 +1,9 @@
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from functools import reduce
-from .container import Container
-from ..utils import with_metaclass
+from .container import ContainerABC
 
 
-class Monoid(with_metaclass(ABCMeta, Container)):
+class Monoid(ContainerABC):
     """
     In Haskell, `Monoid` is a typeclass that provides an interfaces for
     how mempty, mappend and mconcat interact with data types. It's
