@@ -43,7 +43,7 @@ def _single_value_iter(x):
     yield x
 
 
-def with_metaclass(meta, *bases):
+def with_metaclass(meta, bases=(object,), name=None):
     """Creates an anonymous object with a metaclass. Allows compatibility
     between Python2 and Python3.
 
@@ -52,7 +52,7 @@ def with_metaclass(meta, *bases):
     >>> MyThing.__mro__
     ... (MyThing, typeBase, object)
     """
-    name = "{!s}Base".format(meta.__name__)
+    name = name or "{!s}Base".format(meta.__name__)
     return meta(name, bases, {})
 
 
