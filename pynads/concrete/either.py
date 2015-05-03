@@ -1,11 +1,12 @@
+from .option import Option, Full, _Empty
 from ..funcs import fmap
-from ..abc import Monad
+from ..abc import Monad, Container
 from ..utils.compat import wraps
 from ..utils.decorators import method_optional_kwargs
 from ..utils.internal import _propagate_self
 
 
-class Either(Monad):
+class Either(Monad, Option):
     """Enhanced version of Maybe. Represents a successful computation or
     a failed computationi with an error message. Either's unit method returns
     an instance of Right, which is the minimal needed context for a possible
@@ -79,15 +80,30 @@ class Either(Monad):
        y = bad_get_int() >> sqr >> inc
 
     Unlike Maybe, Either doesn't have a default checker. You must provide a
-    Left with a message or a Right with a value to be returned, as well as
+    Left with an error or a Right with a value to be returned, as well as
     the condition which causes that result. Other than that, it acts like
     Maybe in all respects.
 
     If a Left is mapped, applied or bound, the Left simply propagates itself
     until the end of the chain. But a Right will allow the computations to
     still run.
+
+    Either is also combined with the Option class, allowing for a recovering
+    of a potentially failed computation through the get_or, get_or_call,or_else
+    and or_call methods. Recovery is only possible on a Left, as a Right is
+    already a successful computation.
+
+    Either also provides a decorator: ``Either.as_wrapper`` which will attempt
+    to call the wrapped function. If no errors are raised, then the result
+    is returned wrapped in a Right. If the expected error (by default
+    Exception) is raised, then the exception is wrapped in a Left and returned
+    instead. However, if any other errors are encountered, then the exception
+    is propagate until caught or the program exits.
     """
     __slots__ = ()
+
+    def __new__(cls, *args):
+        raise TypeError("Instantiate Left or Right directly.")
 
     def __bool__(self):
         return isinstance(self, Right)
@@ -97,12 +113,16 @@ class Either(Monad):
     @method_optional_kwargs
     @staticmethod
     def as_wrapper(func, expect=Exception):
+        """Either based decorator. Tries to call the wrapped function and
+        if successful returns the value wrapped in a Right. If the expected
+        exception occurs, the exception is wrapped in a Left.
+        """
         @wraps(func)
         def tryer(*args, **kwargs):
             try:
                 return Right(func(*args, **kwargs))
             except expect as e:
-                return Left(repr(e))
+                return Left(e)
         return tryer
 
     @staticmethod
@@ -110,27 +130,46 @@ class Either(Monad):
         return Right(v)
 
 
-class Left(Either):
+class Left(Either, _Empty):
     """Similar to Nothing in that it only returns itself when fmap, apply
     or bind is called. However, Left also carries an error message instead
     of representing an unknown failed computation
     """
     __slots__ = ()
 
+    # needed to override _Empty.__new__
+    def __new__(cls, v):
+        return Container.__new__(cls)
+
     def __repr__(self):
-        return "Left {}".format(self.v)
+        return "Left {!r}".format(self.v)
 
     def __eq__(self, other):
         return isinstance(other, Left) and self.v == other.v
 
     fmap = apply = bind = _propagate_self
 
+    def _get_val(self):
+        return self._v
 
-class Right(Either):
+    @staticmethod
+    def or_else(default):
+        return Right(default) if (default is not None) \
+            else Left("None provided")
+
+    @staticmethod
+    def or_call(func, *args, **kwargs):
+        return Either.as_wrapper(func)(*args, **kwargs)
+
+
+class Right(Either, Full):
     """Represents a result of a computation. Similar to Just except it is
     semantically a finished computation.
     """
     __slots__ = ()
+
+    def __new__(cls, v):
+        return Container.__new__(cls)
 
     def __eq__(self, other):
         return isinstance(other, Right) and other.v == self.v
@@ -146,3 +185,7 @@ class Right(Either):
 
     def bind(self, bindee):
         return bindee(self.v)
+
+    def filter(self, predicate):
+        msg = "{!s} false with input {!r}".format(predicate.__name__, self.v)
+        return self if predicate(self.v) else Left(msg)

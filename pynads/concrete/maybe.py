@@ -1,14 +1,14 @@
-from abc import abstractmethod
+from .option import Option, Full, _Empty
 from ..abc import Monad, Container
 from ..utils.compat import wraps
 from ..utils.decorators import method_optional_kwargs
-from ..utils.internal import _propagate_self, Instance
+from ..utils.internal import _propagate_self
 
 
 __all__ = ('Maybe', 'Just', 'Nothing')
 
 
-class Maybe(Monad):
+class Maybe(Monad, Option):
     """Represents a potential computation.
 
     The actual constructor for Maybe doesn't return an instance of Maybe
@@ -103,8 +103,9 @@ class Maybe(Monad):
     ... Just(4)
 
     Since monads aren't just about the bind operator, but really about
-    sequencing operations, the Maybe monad here is combined with Scala's Option
-    monad. The implementation here is inspired by fn.py's version of Option.
+    sequencing operations, the Maybe monad here is combined with the Option
+    class. Just is also a subclass of Full and Nothing is also an instance
+    of Empty.
 
     It's also possible to decorator callables with Maybe via
     ``Maybe.as_wrapper`` which wraps the output of a function in the Maybe
@@ -114,9 +115,7 @@ class Maybe(Monad):
     __slots__ = ()
 
     def __new__(self, v, checker=lambda v: v is not None):
-        if checker(v):
-            return super(Maybe, self).__new__(Just, v)
-        return Nothing
+        return Just(v) if checker(v) else Nothing
 
     def __bool__(self):
         return isinstance(self, Just)
@@ -150,28 +149,8 @@ class Maybe(Monad):
             return cls(func(*args, **kwargs), checker=checker)
         return wrapper
 
-    @abstractmethod
-    def filter(self, predicate):
-        pass
 
-    @abstractmethod
-    def get_or(self, default):
-        pass
-
-    @abstractmethod
-    def get_or_call(self, func, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def or_else(self, default):
-        pass
-
-    @abstractmethod
-    def or_call(self, func, *args, **kwargs):
-        pass
-
-
-class Just(Maybe):
+class Just(Maybe, Full):
     """Represents a value from a calculation.
     """
     __slots__ = ()
@@ -199,16 +178,8 @@ class Just(Maybe):
     def filter(self, predicate):
         return self if predicate(self.v) else Nothing
 
-    def get_or(self, default):
-        return self.v
 
-    def get_or_call(self, *args, **kwargs):
-        return self.v
-
-    or_else = or_call = _propagate_self
-
-
-class _Nothing(Maybe):
+class _Nothing(Maybe, _Empty):
     """Singleton class representing a monadic failure in a computation.
 
     filter, fmap, apply and bind all return the singleton instance of Nothing
@@ -219,7 +190,6 @@ class _Nothing(Maybe):
     """
     __slots__ = ()
     _inst = None
-    v = Instance()  # lol
 
     def __new__(cls, value=None):
         if cls._inst is None:
@@ -232,15 +202,11 @@ class _Nothing(Maybe):
     def __eq__(self, other):
         return isinstance(other, _Nothing)
 
-    filter = fmap = apply = bind = _propagate_self
+    fmap = apply = bind = _propagate_self
 
     @staticmethod
-    def get_or(default):
-        return default
-
-    @staticmethod
-    def get_or_call(func, *args, **kwargs):
-        return func(*args, **kwargs)
+    def _get_val():
+        return Nothing
 
     @staticmethod
     def or_else(default):
@@ -250,5 +216,5 @@ class _Nothing(Maybe):
     def or_call(func, *args, **kwargs):
         return Maybe(func(*args, **kwargs))
 
-# Singleton Nothing
+
 Nothing = _Nothing()
