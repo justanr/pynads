@@ -251,6 +251,20 @@ class List(Monad, Monoid, Sequence):
     def filter(self, predicate):
         return List(*filter(predicate, self))
 
+    def cons(self, x):
+        """Prepends an item to an existing List.
+        Returns new List.
+        """
+        return List(x).mappend(self)
+
+    def append(self, x):
+        """Appends an item to an existing Listing.
+        Returns new List.
+        """
+        return self.mappend(List(x))
+
+    extend = mappend
+
     # here be boring stuff...
     def __hash__(self):
         return hash(("List", self.v))

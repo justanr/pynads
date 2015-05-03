@@ -136,9 +136,29 @@ def test_list_multibind():
     assert l.v == (-3, 1, 1, 5, -2, 2, 2, 6)
 
 
-
 def test_List_filter():
     assert List(1,2,3,4).filter(lambda x: not x % 2) == List(2,4)
+
+
+def test_List_cons():
+    l = List(2,3)
+    n = l.cons(1)
+
+    assert n == List(1,2,3)
+
+
+def test_List_append():
+    l = List(1,2)
+    n = l.append(3)
+
+    assert n == List(1,2,3)
+
+
+def test_List_extend():
+    l = List(1, 2)
+    n = List(3, 4)
+
+    assert l.extend(n) == List(1, 2, 3, 4)
 
 
 # test boring list stuff to make sure it's proxied correctly...
