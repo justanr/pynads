@@ -248,6 +248,9 @@ class List(Monad, Monoid, Sequence):
         """
         return cls(*chain.from_iterable(monoids))
 
+    def filter(self, predicate):
+        return List(*filter(predicate, self))
+
     # here be boring stuff...
     def __hash__(self):
         return hash(("List", self.v))
@@ -261,6 +264,9 @@ class List(Monad, Monoid, Sequence):
         if isinstance(other, List):
             return not self.v == other.v
         return NotImplemented
+
+    def __bool__(self):
+        return bool(self.v)
 
     # functools.total_ordering (2.7+)
     # I miss thee! D:

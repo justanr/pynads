@@ -8,6 +8,11 @@ minus_or_plus_two = lambda x: [x-2, x+2]
 plus_other = lambda x: lambda y: x+y
 
 
+def test_List_bool():
+    assert List(1,2)
+    assert not List()
+
+
 def test_List_mempty():
     assert List.mempty  == List()
 
@@ -129,6 +134,11 @@ def test_ignore_second_bind():
 def test_list_multibind():
     l = multibind(List(1,2), minus_or_plus_two, minus_or_plus_two)
     assert l.v == (-3, 1, 1, 5, -2, 2, 2, 6)
+
+
+
+def test_List_filter():
+    assert List(1,2,3,4).filter(lambda x: not x % 2) == List(2,4)
 
 
 # test boring list stuff to make sure it's proxied correctly...
