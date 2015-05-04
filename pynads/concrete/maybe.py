@@ -1,4 +1,5 @@
 from .option import Option, Full, _Empty
+from .either import Left, Right
 from ..abc import Monad, Container
 from ..utils.compat import wraps
 from ..utils.decorators import method_optional_kwargs
@@ -148,6 +149,9 @@ class Maybe(Monad, Option):
         def wrapper(*args, **kwargs):
             return cls(func(*args, **kwargs), checker=checker)
         return wrapper
+
+    def to_either(self, error):
+        return Right(self.v) if isinstance(self, Just) else Left(error)
 
 
 class Just(Maybe, Full):

@@ -1,4 +1,4 @@
-from pynads import Maybe, Just, Nothing
+from pynads import Maybe, Just, Nothing, Left, Right
 from pynads.concrete.maybe import _Nothing
 
 add_two = lambda x: x+2
@@ -23,6 +23,12 @@ def test_truthiness():
     assert bool(Just(1))
     assert Nothing == Nothing
     assert Just(1) == Just(1)
+
+
+
+def test_Maybe_to_Either():
+    assert Just(4).to_either(None) == Right(4)
+    assert Nothing.to_either('failure') == Left('failure')
 
 
 def test_nothing_singleton():
