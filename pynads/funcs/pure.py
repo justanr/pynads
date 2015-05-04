@@ -3,12 +3,15 @@ Applicatives and Monads. Rather they act on just plain values. These
 functions are exported by pynads under the `pynads.funcs` namespace.
 """
 
-from ..utils import _get_name, _get_names, wraps
+from ..utils.decorators import annotate
+from ..utils.compat import wraps
+from ..utils.internal import _get_name, _get_names
 
 
 __all__ = ('const', 'identity', 'compose')
 
 
+@annotate(type='a -> b -> a')
 def const(value):
     """Returns a function that accepts any arguments but only returns a
     predetermined constant.
@@ -28,6 +31,7 @@ def const(value):
     return constant
 
 
+@annotate(type='a -> a')
 def identity(v):
     """Always returns its initial value.
 
@@ -40,6 +44,7 @@ def identity(v):
     return v
 
 
+@annotate(type='(b -> c) -> (a -> b) -> (a -> c)')
 def compose(*fs):
     """Composes several functions into one.
 
@@ -49,7 +54,7 @@ def compose(*fs):
     If no functions are provided, the identity function is returned. If
     only one function is provided, only that function is returned.
 
-    If the closure is actually generated, it's doc string lits the functions
+    If the closure is actually generated, it's doc string lists the functions
     it composes.
 
     >>> def inc(x): return x+1
