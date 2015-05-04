@@ -161,6 +161,36 @@ def test_List_extend():
     assert l.extend(n) == List(1, 2, 3, 4)
 
 
+
+def test_List_distinct():
+    l =  List(1,1,3,2,1)
+    assert (~l) == l.distinct() == List(1, 3, 2)
+
+
+def test_List_union():
+    threes, fives = List(*range(3, 16, 3)), List(*range(5, 16, 5))
+    expected = List(3, 6, 9, 12, 15, 5, 10)
+    assert threes.union(fives) == (threes | fives) == expected
+
+
+def test_List_intersect():
+    threes, fives = List(*range(3, 16, 3)), List(*range(5, 16, 5))
+    expected = List(15)
+    assert threes.intersect(fives) == (threes & fives) == expected
+
+
+def test_List_difference():
+    threes, fives = List(*range(3, 16, 3)), List(*range(5, 16, 5))
+    expected = List(3, 6, 9, 12), List(5, 10)
+    assert threes.difference(fives) == (threes - fives) == expected[0]
+    assert fives.difference(threes) == (fives - threes) == expected[1]
+
+
+def test_List_symmetric_difference():
+    threes, fives = List(*range(3, 16, 3)), List(*range(5, 16, 5))
+    expected = List(3, 6, 9, 12, 5, 10)
+    assert threes.symmetric_difference(fives) == (threes ^ fives) == expected
+
 # test boring list stuff to make sure it's proxied correctly...
 def test_List_getitem():
     assert List(1,2,3)[0] == 1

@@ -265,7 +265,82 @@ class List(Monad, Monoid, Sequence):
 
     extend = mappend
 
-    # here be boring stuff...
+    # set like operations
+    # use of filter and chain is to avoid creation
+    # of intermediate List objects which are expensive
+    # but immediately garbage collected
+    # saw times drop from ~180ms to ~1.5ms
+    # when tested with List(*range(3, 10001, 3) and
+    # List(*range(5, 10001, 5) as the test subjects
+    # The restriction with these is the same as Python's set
+    # the contained objects must be hashable
+    def union(self, other):
+        """Unique union of two Lists, i.e. every item in both lists
+        """
+        return List.distinct(chain(self, other))
+
+    def __or__(self, other):
+        return self.union(other)
+
+    __ior__ = __or__
+
+    def intersect(self, other):
+        """Unique intersection of two Lists, i.e.
+        every item that appears in both Lists.
+        """
+        intersect_set = set(self).intersection(set(other))
+        in_set = lambda n: n in intersect_set
+        this = filter(in_set, self)
+        that = filter(in_set, other)
+        return List.distinct(chain(this, that))
+
+    def __and__(self, other):
+        return self.intersect(other)
+
+    __iand__ = __and__
+
+    def difference(self, other):
+        """Difference of two lists, i.e. every item in this list
+        that's not in the other
+        """
+        diff_set = set(self).difference(set(other))
+        this = filter(lambda n: n in diff_set, self)
+        return List.distinct(this)
+
+    def __sub__(self, other):
+        return self.difference(other)
+
+    __isub__ = __sub__
+
+    def symmetric_difference(self, other):
+        """Symmetric difference of two lists, i.e. every item that only
+        appears in each list.
+        """
+        sym_diff_set = set(self).symmetric_difference(set(other))
+        in_set = lambda n: n in sym_diff_set
+        this = filter(in_set, self)
+        that = filter(in_set, other)
+        return List.distinct(chain(this, that))
+
+    def __xor__(self, other):
+        return self.symmetric_difference(other)
+
+    __ixor__ = __xor__
+
+    def distinct(self):
+        unique_list = []
+        unique_set = set()
+        for item in self:
+            if item not in unique_set:
+                unique_set.add(item)
+                unique_list.append(item)
+        return List(*unique_list)
+
+    def __invert__(self):
+        return self.distinct()
+
+
+# here be boring stuff...
     def __hash__(self):
         return hash(("List", self.v))
 
