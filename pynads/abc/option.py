@@ -1,7 +1,5 @@
 from abc import abstractmethod
-from ..abc import Container, Functor
-from ..utils.compat import wraps
-from ..utils.decorators import method_optional_kwargs
+from .functor import Functor
 from ..utils.internal import _propagate_self
 
 
@@ -42,21 +40,10 @@ class Option(Functor):
     """
     __slots__ = ()
 
-    def __new__(cls, v, checker=lambda x: x is not None):
-        return Full(v) if checker(v) else Empty
-
     def __bool__(self):
         return isinstance(self, Full)
 
     __nonzero__ = __bool__
-
-    @method_optional_kwargs
-    @classmethod
-    def as_wrapper(cls, func, checker=lambda x: x is not None):
-        @wraps(func)
-        def optioner(*args, **kwargs):
-            return cls(func(*args, **kwargs), checker=checker)
-        return optioner
 
     @abstractmethod
     def filter(self, predicate):
@@ -84,18 +71,6 @@ class Full(Option):
     """
     __slots__ = ()
 
-    def __new__(cls, v):
-        return Container.__new__(cls)
-
-    def __repr__(self):
-        return "Full({!r})".format(self.v)
-
-    def __eq__(self, other):
-        return isinstance(other, Full) and self.v == other.v
-
-    def fmap(self, func):
-        return Full(func(self.v))
-
     def filter(self, predicate):
         return self if predicate(self.v) else Empty
 
@@ -108,29 +83,11 @@ class Full(Option):
     or_else = or_call = _propagate_self
 
 
-class _Empty(Option):
+class Empty(Option):
     """A recoverable failure in a processing line through get_or, get_or_call,
     or_else and or_call. _Empty is implemented as a singleton as it stores
     no data.
     """
-    __slots__ = ()
-    _inst = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls._inst is None:
-            cls._inst = Container.__new__(cls)
-        return cls._inst
-
-    def __repr__(self):
-        return "Empty"
-
-    def __eq__(self, other):
-        return self is other or isinstance(other, _Empty)
-
-    @staticmethod
-    def _get_val():
-        return Empty
-
     fmap = filter = _propagate_self
 
     @staticmethod
@@ -145,18 +102,3 @@ class _Empty(Option):
         possess no values.
         """
         return func(*args, **kwargs)
-
-    @staticmethod
-    def or_else(default):
-        """Returns the provided default wrapped in an Option.
-        """
-        return Option(default)
-
-    @staticmethod
-    def or_call(func, *args, **kwargs):
-        """Returns the provided function with the provided arguments and the
-        result is wrapped in an Option.
-        """
-        return Option(func(*args, **kwargs))
-
-Empty = _Empty()

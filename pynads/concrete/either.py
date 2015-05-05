@@ -1,6 +1,5 @@
-from .option import Option, Full, _Empty
 from ..funcs import fmap
-from ..abc import Monad, Container
+from ..abc import Monad, Container, Option, Full, Empty
 from ..utils.compat import wraps
 from ..utils.decorators import method_optional_kwargs
 from ..utils.internal import _propagate_self
@@ -102,9 +101,6 @@ class Either(Monad, Option):
     """
     __slots__ = ()
 
-    def __new__(cls, *args):
-        raise TypeError("Instantiate Left or Right directly.")
-
     def __bool__(self):
         return isinstance(self, Right)
 
@@ -130,17 +126,12 @@ class Either(Monad, Option):
         return Right(v)
 
 
-class Left(Either, _Empty):
+class Left(Either, Empty):
     """Similar to Nothing in that it only returns itself when fmap, apply
     or bind is called. However, Left also carries an error message instead
     of representing an unknown failed computation
     """
     __slots__ = ()
-
-    # needed to override _Empty.__new__
-    def __new__(cls, v):
-        return Container.__new__(cls)
-
     def __repr__(self):
         return "Left {!r}".format(self.v)
 

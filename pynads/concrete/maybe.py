@@ -1,6 +1,5 @@
-from .option import Option, Full, _Empty
 from .either import Left, Right
-from ..abc import Monad, Container
+from ..abc import Monad, Container, Option, Full, Empty
 from ..utils.compat import wraps
 from ..utils.decorators import method_optional_kwargs
 from ..utils.internal import _propagate_self
@@ -183,7 +182,7 @@ class Just(Maybe, Full):
         return self if predicate(self.v) else Nothing
 
 
-class _Nothing(Maybe, _Empty):
+class _Nothing(Maybe, Empty):
     """Singleton class representing a monadic failure in a computation.
 
     filter, fmap, apply and bind all return the singleton instance of Nothing
